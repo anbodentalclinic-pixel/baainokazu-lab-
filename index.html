@@ -135,9 +135,9 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const LABS=[
 {id:'bund',t:'同じものを、自分の手で作る',d:'回す・入れかえる・名前を付けかえる。何個が重なるかを動かして確かめる'},
 {id:'path',t:'最短経路を数える',d:'なぜ矢印の並べ方で数えるのか、から始める'},
-{id:'bars',t:'重複組合せ = ○と仕切りの並べ方(118頁)',d:'仕切りを置く場所を選ぶだけ'}
+{id:'bars',t:'重複組合せ(118頁)',d:'果物を買ってみる → 並べ直す → 仕切りを立てる → ○ に書きかえる'}
 ];
-const L={perm:{n:5,r:3,ch:[]},bund:{i:0,g:false},path:{w:4,h:3,m:[],q73:false,intro:true},bars:{b:[],min1:false}};
+const L={perm:{n:5,r:3,ch:[]},bund:{i:0,g:false},path:{w:4,h:3,m:[],q73:false,intro:true},bars:{b:[],min1:false,intro:true,bk:[],seen:false}};
 
 function labMenu(){
  return `<div class="card"><h2>重なりと置き換え</h2><div class="sub">割り算が出てくるのは、同じものを何回も数えているとき。何回数えたかは、1つを自分で動かしてみれば分かる。<br>道や分け方の問題は、別のものの並べ方に置き換えて数える。</div></div>`+
@@ -298,13 +298,42 @@ function labPath(){
  <div class="row"><button class="btn sm" data-gw="-1">横−</button><span>横${w}</span><button class="btn sm" data-gw="1">横＋</button><button class="btn sm" data-gh="-1">縦−</button><span>縦${h}</span><button class="btn sm" data-gh="1">縦＋</button><button class="btn sm pri" data-g73="1">問題73の図</button></div></div>
  <div class="card"><h3>条件つきの経路</h3><div class="sub">「R を通る」= (P→R の道の数) × (R→Q の道の数)。前半の列と後半の列を別々に並べるだけ。<br>「× を通らない」= (全部) − (× を通る)。× の区間の手前の点までと、先の点からで掛け算して引く。</div></div>`;
 }
+const FR=[['柿','#e07b28'],['りんご','#d0423a'],['みかん','#d9a400']];
+const frc=(k,cls)=>`<span class="sc ${cls||''}" style="background:${FR[k][1]};min-width:34px;height:34px;border-radius:17px">${FR[k][0][0]}</span>`;
+const frBar=cls=>`<span class="sbx on ${cls||''}" style="min-width:20px;min-height:36px;padding:0 3px"><b>｜</b></span>`;
+const frO=()=>`<span class="sbx" style="min-width:30px;min-height:36px;padding:0"><b>○</b></span>`;
+function frRows(cnt,fx){const srt=[0,1,2].flatMap(k=>Array(cnt[k]).fill(k)),wb=[0,1,2].map(k=>Array(cnt[k]).fill(k).map(x=>frc(x)).join('')).join(frBar(fx)),ob=[0,1,2].map(k=>Array(cnt[k]).fill(0).map(frO).join('')).join(frBar());return{srt,wb,ob}}
+function barsIntro(){
+ const s=L.bars,N=4,cnt=[0,1,2].map(k=>s.bk.filter(x=>x===k).length),full=s.bk.length>=N,r=frRows(cnt),fx=FX.bk?'fxpulse':'';
+ let all=[];for(let a=N;a>=0;a--)for(let b=N-a;b>=0;b--)all.push([a,b,N-a-b]);
+ let h=back('lab')+`<div class="card"><h2>○ と仕切りで数える前に</h2><div>柿・りんご・みかんの3種類から、合わせて4個買う。同じ種類を何個買ってもよいし、買わない種類があってもよい。<b>買い方は何通りあるか。</b></div>
+ <div class="sub" style="margin-top:6px">まず自分で4個買ってみる。下のボタンで、かごに入れる。</div>
+ <div class="row" style="margin-top:8px">${FR.map((f,k)=>`<button class="btn" style="background:${f[1]};color:#fff;border-color:${f[1]}" data-bk="${k}" ${full?'disabled':''}>${f[0]}</button>`).join('')}<button class="btn sm" data-bk="u" ${s.bk.length?'':'disabled'}>1個戻す</button><button class="btn sm" data-bk="c" ${s.bk.length?'':'disabled'}>空にする</button></div></div>
+ <div class="card"><h3 style="margin-top:0">① かごに入れた順</h3><div class="srow" style="justify-content:flex-start;min-height:38px">${s.bk.map((k,i)=>frc(k,i===s.bk.length-1?fx:'')).join('')||'<span class="sub">まだ空</span>'}</div>
+ <div class="sub">買い物では、入れた順番は関係ない。大事なのは「どれを何個か」だけ。</div>
+ <h3>② 種類ごとに並べ直す(柿 → りんご → みかん の順)</h3><div class="srow" style="justify-content:flex-start;min-height:38px">${r.srt.map(k=>frc(k)).join('')||'<span class="sub">—</span>'}</div>
+ <div class="sub"><b>${FR.map((f,k)=>f[0]+' '+cnt[k]+'個').join('・')}</b>。入れる順番を変えても、ここは同じ並びになる。</div>
+ <h3>③ 種類の境目に、仕切りを立てる</h3><div class="srow" style="justify-content:flex-start;min-height:38px">${r.wb}</div>
+ <div class="sub">仕切りは必ず2本(3種類の境目は2か所)。買っていない種類があると、仕切りが隣り合ったり、端に来たりする。</div>
+ <h3>④ 果物を ○ に書きかえる</h3><div class="srow" style="justify-content:flex-start;min-height:38px">${r.ob}</div>
+ <div class="sub">仕切りがあるので、○ だけでも「左が柿、間がりんご、右がみかん」と読める。</div>
+ <div class="say ${full&&FX.bk?'fxpulse':''}">${full?`4個買った。この買い方は「<b>○ 4個と ｜ 2本</b>を並べた列」1つに書きかえられた。<br>「空にする」で、ちがう買い方も試してみよう(柿ばかり4個、など)。`:`あと ${N-s.bk.length}個。1個入れるたびに、①〜④ がどう変わるかを見る。`}</div></div>`;
+ if(s.seen)h+=`<div class="card"><h3 style="margin-top:0">⑤ 買い方を全部並べる</h3><div class="sub">左が買ったもの、右が ○ と仕切りに書きかえたもの。</div>
+ ${all.map((c,i)=>{const q=frRows(c);return `<div class="fxin" style="display:flex;align-items:center;gap:6px;margin:5px 0;animation-delay:${FX.bk?i*.12:0}s"><span style="display:inline-flex;gap:2px;min-width:150px">${q.srt.map(k=>frc(k)).join('')}</span><span class="sub">→</span><span class="mini" style="font-size:16px">${[0,1,2].map(k=>'○'.repeat(c[k])).join('｜')}</span></div>`}).join('')}
+ <div class="say">買い方は <b>${all.length}通り</b>。右の列も ${all.length}通りで、同じ並びは1つもない。<br>買い方1つと、○ と仕切りの並び1つが、ぴったり組になっている。</div>
+ <div class="why">だから「買い方は何通りか」は「○ 4個と ｜ 2本を並べる方法は何通りか」と同じ問題。<br>場所は全部で 4 + 2 = 6か所。そのうち仕切りを置く2か所を選べば、並びが1つ決まる。6か所から2か所を選ぶ方法は 6 × 5 ÷ 2 = <b>15通り</b>。上で数えた数と合う。</div>
+ <div class="row"><button class="btn pri" data-bintro="0">10個買う問題でやってみる</button></div></div>`;
+ else h+=`<div class="card"><div class="sub">4個買い終わると、続き(買い方を全部並べる)が出る。</div></div>`;
+ return h;
+}
 function labBars(){
+ if(L.bars.intro)return barsIntro();
  const s=L.bars,tot=s.min1?7:10,n=tot+2,b=s.b.slice().sort((p,q)=>p-q);
  let cells='';for(let i=0;i<n;i++)cells+=`<button class="cell ${b.includes(i)?'bar':''} ${b.includes(i)&&(FX.cell===i||FX.cellAll)?'fxpulse':''}" data-cell="${i}">${b.includes(i)?'｜':'○'}</button>`;
  let msg;
- if(b.length===2){const a=[b[0],b[1]-b[0]-1,n-1-b[1]].map(v=>v+(s.min1?1:0));msg=`柿 <b>${a[0]}</b>個・りんご <b>${a[1]}</b>個・みかん <b>${a[2]}</b>個(合計10個)${s.min1?'<br>※先に1個ずつ買った分を足してある':''}`}
+ if(b.length===2){const a=[b[0],b[1]-b[0]-1,n-1-b[1]].map(v=>v+(s.min1?1:0));msg=`<div class="srow" style="justify-content:flex-start;gap:2px">${[0,1,2].map(k=>Array(a[k]).fill(0).map(()=>frc(k)).join('')).join('<span style="width:8px"></span>')}</div>柿 <b>${a[0]}</b>個・りんご <b>${a[1]}</b>個・みかん <b>${a[2]}</b>個(合計10個)${s.min1?'<br>※先に1個ずつ買った分を足してある':''}`}
  else msg=`仕切り ｜ にしたい場所を <b>あと${2-b.length}か所</b> タップ。`;
- return back('lab')+`<div class="card"><h2>3種類の果物から10個買う</h2>
+ return back('lab')+`<div class="card"><h2>3種類の果物から10個買う</h2><div class="row"><button class="btn sm" data-bintro="1">なぜ ○ と仕切りで考えるのか(説明に戻る)</button></div>
  <div class="sub">${s.min1?'どの果物も1個以上:先に1個ずつ買ってしまい、残り7個を自由に分ける。':'買わない果物があってもよい。'}</div>
  <div class="cells">${cells}</div>
  <div class="say ${b.length===2&&(FX.cell!==undefined||FX.cellAll)?'fxpulse':''}">${msg}</div>
@@ -775,7 +804,7 @@ function render(){
 document.addEventListener('click',ev=>{
  const b=ev.target.closest('button');if(!b)return;const d=b.dataset;let top=false;if(!d.kbest)G.play=null;if(!d.bauto)L.bund.auto=false;
  if(d.tab){S.tab=d.tab;if(d.tab==='drill')S.drill=null;if(d.tab==='cnt')G.i=null;top=true}
- else if(d.lab){S.lab=d.lab;if(d.lab==='path')L.path.intro=true;top=true}
+ else if(d.lab){S.lab=d.lab;if(d.lab==='path')L.path.intro=true;if(d.lab==='bars')L.bars.intro=true;top=true}
  else if(d.back){if(d.back==='lab')S.lab=null;else if(d.back==='cnt')G.i=null;else S.drill=null;top=true}
  else if(d.kopen!==undefined){kOpen(+d.kopen);top=true}
  else if(d.ko!==undefined){G.ord.push(+d.ko);G.anim=true}
@@ -789,6 +818,8 @@ document.addEventListener('click',ev=>{
  else if(d.preset){L.perm.ch=[]}
  else if(d.bg){L.bund.g=!L.bund.g;FX.bg=1}
  else if(d.mv){const s=L.path;if(d.mv==='u')s.m.pop();else if(d.mv==='r'){s.m=shuffle(Array(s.w).fill('→').concat(Array(s.h).fill('↑')))}else s.m.push(d.mv);FX.mv=d.mv==='r'?'all':d.mv==='u'?null:'last'}
+ else if(d.bintro){L.bars.intro=d.bintro==='1';top=true}
+ else if(d.bk!==undefined){const s=L.bars;if(d.bk==='u')s.bk.pop();else if(d.bk==='c')s.bk=[];else if(s.bk.length<4)s.bk.push(+d.bk);if(s.bk.length>=4)s.seen=true;FX.bk=1}
  else if(d.pintro){L.path.intro=d.pintro==='1';top=true}
  else if(d.g73){const s=L.path;s.w=7;s.h=5;s.m=[];s.q73=true}
  else if(d.gw){const s=L.path;s.w=Math.max(2,Math.min(7,s.w+ +d.gw));s.m=[];s.q73=false}
@@ -801,7 +832,7 @@ document.addEventListener('click',ev=>{
   FX.ans={k,j,ok:j===0};if(j===0){st.step++;if(st.step>=D[st.i].s.length){S.done[D[st.i].id]=1;store.set('done',S.done)}}else st.ng[k+'_'+j]=1}
  else if(d.qc!==undefined){const z=S.quiz,nx=qNext();if(!nx)return;if(d.qc==='go'||+d.qc===nx.v){z.L++;z.ng={};FX.qc=1}else{z.ng[z.L+'_'+d.qc]=1;FX.qng=+d.qc}}
  else if(d.qd!==undefined){const z=S.quiz,sp=spOf('q'+z.i,QS[z.i]);if(+d.qd===sp.div.by){z.dv=true;FX.qd=1}else{z.ng['d_'+d.qd]=1;FX.qng=+d.qd}}
- else if(d.golab){const[lb,i]=d.golab.split(':');S.tab='lab';S.lab=lb;if(lb==='bund'){L.bund.i=+i;L.bund.orb=null;L.bund.g=false}if(lb==='path'){const s=L.path;s.intro=false;s.w=7;s.h=5;s.m=[];s.q73=true}top=true}
+ else if(d.golab){const[lb,i]=d.golab.split(':');S.tab='lab';S.lab=lb;if(lb==='bund'){L.bund.i=+i;L.bund.orb=null;L.bund.g=false}if(lb==='bars')L.bars.intro=true;if(lb==='path'){const s=L.path;s.intro=false;s.w=7;s.h=5;s.m=[];s.q73=true}top=true}
  else if(d.qa!==undefined){if(S.quiz.pick!==null)return;S.quiz.pick=+d.qa;FX.qa=1;S.qs.n++;if(+d.qa===Q[S.quiz.i].a)S.qs.ok++;store.set('qs',S.qs)}
  else if(d.qn){newQuiz();top=true}
  else return;
