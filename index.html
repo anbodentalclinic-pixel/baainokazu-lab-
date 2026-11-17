@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="場合の数ラボ">
+<meta name="theme-color" content="#1f3a5f">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>場合の数ラボ</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1d2733;--sub:#5d6875;--line:#d9d4c8;--main:#1f3a5f;--acc:#c8553d;--ok:#2e7d5b;--okbg:#e3f3ea;--ng:#b3402e;--ngbg:#fbe6e1;--chip:#eef2f7;--hl:#fff3c4}
+@media (prefers-color-scheme:dark){:root{--bg:#12171d;--card:#1b232c;--ink:#e8edf2;--sub:#9aa7b4;--line:#2f3a46;--main:#8fb8ea;--acc:#f08a70;--ok:#6fcf9f;--okbg:#17352a;--ng:#f08a70;--ngbg:#3a1f1a;--chip:#26313c;--hl:#4a4014}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:16px;line-height:1.65;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header{padding:14px 16px 8px;max-width:640px;margin:0 auto}
+header h1{font-size:19px;margin:0;color:var(--main);letter-spacing:.04em}
+header p{margin:2px 0 0;font-size:12px;color:var(--sub)}
+main{max-width:640px;margin:0 auto;padding:0 12px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--sub);font-size:11px;padding:10px 0 9px;font-family:inherit}
+nav button b{display:block;font-size:17px;font-weight:700}
+nav button.on{color:var(--main);box-shadow:inset 0 3px 0 var(--main)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.card h2{font-size:16px;margin:0 0 6px;color:var(--main)}
+.card h3{font-size:14px;margin:12px 0 4px}
+.sub{color:var(--sub);font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button.btn{font-family:inherit;font-size:15px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:9px 14px;min-height:44px}
+button.btn.pri{background:var(--main);color:var(--card);border-color:var(--main);font-weight:700}
+button.btn.sm{font-size:13px;padding:6px 10px;min-height:36px}
+button.btn:disabled{opacity:.35}
+.item{display:block;width:100%;text-align:left;font-family:inherit;font-size:15px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;color:var(--ink)}
+.item .tag{display:inline-block;font-size:11px;background:var(--chip);color:var(--main);border-radius:6px;padding:1px 7px;margin-right:6px}
+.item .done{float:right;color:var(--ok);font-weight:700}
+.back{border:0;background:none;color:var(--main);font-size:14px;padding:10px 2px;font-family:inherit}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;border-radius:22px;border:2px solid transparent;font-weight:700;font-size:17px;color:#fff;font-family:inherit}
+.chip.off{opacity:.2}
+.slot{display:inline-flex;align-items:center;justify-content:center;width:48px;height:52px;border:2px dashed var(--line);border-radius:10px;font-weight:700;font-size:18px;color:#fff}
+.slot.now{border-color:var(--acc);border-style:solid}
+.big{font-size:22px;font-weight:700;color:var(--main);margin:8px 0;word-break:break-all}
+.say{background:var(--hl);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px}
+.why{background:var(--okbg);border-left:4px solid var(--ok);border-radius:6px;padding:8px 10px;margin:8px 0;font-size:14px}
+.opt{display:block;width:100%;text-align:left;font-family:inherit;font-size:15px;line-height:1.5;background:var(--chip);border:2px solid transparent;border-radius:10px;padding:10px 12px;margin:6px 0;color:var(--ink);min-height:44px}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.ng{background:var(--ngbg);border-color:var(--ng);opacity:.7}
+.stepn{font-size:12px;font-weight:700;color:var(--acc);margin-top:14px}
+.bund{display:flex;flex-wrap:wrap;gap:4px;border:1px solid var(--line);border-radius:8px;padding:5px;margin:5px 0;align-items:center}
+.bund .k{font-size:12px;font-weight:700;color:var(--main);min-width:48px}
+.tok{font-size:13px;background:var(--chip);border-radius:6px;padding:2px 6px;font-family:ui-monospace,Menlo,monospace}
+.tok.v{background:var(--hl);font-weight:700}
+.flat{display:flex;flex-wrap:wrap;gap:4px}
+.cells{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cell{width:38px;height:46px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:20px;font-family:inherit;color:var(--ink)}
+.cell.bar{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+
+.kslot{flex:1;min-width:56px;font-family:inherit;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 2px;text-align:center;min-height:58px}
+.kslot span{display:block;font-size:10px;color:var(--sub)}.kslot b{font-size:18px}
+.kslot.sel{border-color:var(--acc);background:var(--hl)}.kslot.fix{background:var(--chip);border-style:dashed}
+.br{display:flex;align-items:center;gap:8px;width:100%;font-family:inherit;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:5px 0;color:var(--ink);min-height:44px}
+.br b{min-width:34px;font-size:17px}.br i{display:block;height:14px;border-radius:7px;background:var(--main);flex:none}.br:disabled{opacity:.4}
+.br em{font-style:normal;color:var(--sub);font-size:13px;margin-left:auto;white-space:nowrap}
+@keyframes kdraw{to{stroke-dashoffset:0}}@keyframes kcalm{to{stroke:var(--sub)}}@keyframes kfadein{to{opacity:1}}
+@keyframes kpopin{0%{opacity:0;transform:scale(.3)}60%{opacity:1;transform:scale(1.7);color:var(--acc)}100%{opacity:1;transform:scale(1)}}
+@keyframes ksw{0%{opacity:.55;transform:translateY(0)}95%{opacity:.55}100%{opacity:0;transform:translateY(var(--d))}}
+.kline{animation:kdraw .35s ease-out forwards,kcalm .6s forwards}.kfade{opacity:0;animation:kfadein .3s forwards}
+.kpop{display:inline-block;opacity:0;animation:kpopin .6s forwards}.ksweep{opacity:0;animation:ksw 1.4s linear forwards}
+@media (prefers-reduced-motion:reduce){.kline{animation:none;stroke-dashoffset:0!important;stroke:var(--sub)}.kfade,.kpop{animation:none;opacity:1}.ksweep{animation:none}}
+@keyframes fxin{from{opacity:0;transform:translateY(10px)}}@keyframes fxshake{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes fxpulse{0%{transform:scale(.92)}45%{transform:scale(1.06);box-shadow:0 0 0 6px rgba(200,85,61,.25)}100%{transform:scale(1)}}
+@keyframes fxtok{0%{transform:scale(2.4);background:var(--acc);color:#fff}70%{background:var(--acc);color:#fff}}
+@keyframes fxrot{from{transform:rotate(90deg)}}@keyframes fxflip{0%{transform:scaleX(1)}50%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+@keyframes fxband{to{opacity:.24}}
+.fxin{animation:fxin .3s ease-out both}.fxshake{animation:fxshake .4s}.fxpulse{animation:fxpulse .5s ease-out}
+.tok{display:inline-block}.tok.fxnew{animation:fxtok .7s ease-out}.fxrot{animation:fxrot .55s ease-in-out}.fxflip{animation:fxflip .6s ease-in-out}
+.kdraw2{animation:kdraw .3s ease-out forwards}.kband{opacity:0;animation:fxband .5s forwards}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+@media (prefers-reduced-motion:reduce){.fxin,.fxshake,.fxpulse,.tok.fxnew,.fxrot,.fxflip{animation:none}.kdraw2{animation:none;stroke-dashoffset:0!important}.kband{animation:none;opacity:.24}}
+@keyframes fbw{to{transform:scaleX(1)}}
+.frow{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;margin:10px 0;font-weight:700;font-size:17px}
+.fg{display:inline-flex;flex-direction:column;align-items:center}.fb{display:block;width:100%;height:8px;border:2px solid var(--acc);border-top:0;border-radius:0 0 8px 8px;margin-top:2px}
+.fbA{transform:scaleX(0);animation:fbw .45s ease-out forwards}.fl{color:var(--acc);font-size:17px}
+.frac{margin-top:12px;padding:10px 12px;border:2px dashed var(--line);border-radius:12px}
+.fr1,.fr2{display:flex;gap:10px;align-items:center;font-size:14px;line-height:1.4}.fr1>b,.fr2>b{min-width:66px;text-align:center;font-size:22px;border-radius:8px;padding:3px 6px}
+.fr1>b{background:var(--chip)}.fr2>b{background:var(--hl)}.frbar{height:3px;background:var(--ink);width:66px;margin:6px 0;transform-origin:left}
+.frac small{color:var(--sub)}.fres{margin-top:8px;font-size:17px}.fres .acc{color:var(--acc);font-size:20px}
+@media (prefers-reduced-motion:reduce){.fbA{animation:none;transform:none}}
+@keyframes fxgc{to{background:var(--gc);color:#1d2733}}
+.tok.gc{background:var(--gc);color:#1d2733}.tok.gcA{animation:fxgc .35s forwards}
+.bchip{display:inline-flex;flex-direction:column;align-items:center;border-radius:8px;padding:3px 8px;font-weight:700;font-size:13px;color:#1d2733;font-family:ui-monospace,Menlo,monospace}
+.bchip small{font-weight:400;font-size:10px}
+.mini{font-family:ui-monospace,Menlo,monospace;font-size:14px;letter-spacing:1px;background:var(--chip);border-radius:6px;padding:3px 6px;display:inline-block;margin:2px 0}
+@media (prefers-reduced-motion:reduce){.tok.gcA{animation:none;background:var(--gc);color:#1d2733}}
+.scene{border:1px solid var(--line);border-radius:12px;padding:8px 6px;margin:8px 0;background:var(--bg)}
+.srow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center;margin:5px 0}
+.sc{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 4px;border-radius:15px;font-weight:700;font-size:13px;color:#fff;background:var(--main)}.sc.off{opacity:.22}
+.sbx{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:40px;min-height:44px;padding:2px 4px;border:2px solid var(--line);border-radius:8px;background:var(--card);font-size:16px;text-align:center}
+.sbx small{font-size:9px;color:var(--sub);line-height:1.2}.sbx.on{border-color:var(--acc);background:var(--hl)}
+.sgap{color:var(--sub);font-size:11px;text-align:center;line-height:1.2}.sblk{display:inline-flex;gap:4px;border:2px solid var(--acc);border-radius:12px;padding:3px 5px;align-items:center}
+.sgrp{display:inline-flex;flex-direction:column;align-items:center;border:2px solid var(--line);border-radius:10px;padding:4px 6px;min-width:60px;min-height:52px;background:var(--card)}.sgrp>small{font-size:10px;color:var(--sub)}
+svg{max-width:100%;height:auto;display:block;margin:6px auto}
+select{font-family:inherit;font-size:15px;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;min-height:44px}
+.score{font-size:13px;color:var(--sub);text-align:right}
+</style>
+</head>
+<body>
+<header><h1>場合の数ラボ</h1><p>式は覚えるものではなく、数えた結果として最後にできるもの。</p></header>
+<main id="app"></main>
+<nav>
+<button data-tab="cnt"><b>数える</b>樹形図を描く</button>
+<button data-tab="lab"><b>重なり</b>同じものを作る</button>
+<button data-tab="drill"><b>確認</b>問題集の問題</button>
+<button data-tab="quiz"><b>初見</b>答えまで進む</button>
+</nav>
+<script>
+"use strict";
+/* ---------- 共通 ---------- */
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const COL=['#c8553d','#2f6fb0','#2e7d5b','#b07d1a','#7b4fa3','#3c8c94'];
+const NAME='ABCDEF';
+const store={get(k,d){try{const v=localStorage.getItem('bk_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('bk_'+k,JSON.stringify(v))}catch(e){}}};
+let FX={};
+const S={tab:'cnt',lab:null,drill:null,done:store.get('done',{}),quiz:null,qs:store.get('qs',{n:0,ok:0})};
+const fact=n=>n<2?1:n*fact(n-1);
+const P=(n,r)=>{let x=1;for(let i=0;i<r;i++)x*=n-i;return x};
+const C=(n,r)=>P(n,r)/fact(r);
+const SUB='₀₁₂₃₄₅₆₇₈₉';const sub=n=>String(n).split('').map(c=>SUB[+c]).join('');
+function permsR(a,r){if(r===0)return[[]];const o=[];a.forEach((x,i)=>{const rest=a.slice(0,i).concat(a.slice(i+1));permsR(rest,r-1).forEach(p=>o.push([x].concat(p)))});return o}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ---------- ラボ ---------- */
+const LABS=[
+{id:'bund',t:'同じものを、自分の手で作る',d:'回す・入れかえる・名前を付けかえる。何個が重なるかを動かして確かめる'},
+{id:'path',t:'最短経路を数える',d:'なぜ矢印の並べ方で数えるのか、から始める'},
+{id:'bars',t:'重複組合せ = ○と仕切りの並べ方(118頁)',d:'仕切りを置く場所を選ぶだけ'}
+];
+const L={perm:{n:5,r:3,ch:[]},bund:{i:0,g:false},path:{w:4,h:3,m:[],q73:false,intro:true},bars:{b:[],min1:false}};
+
+function labMenu(){
+ return `<div class="card"><h2>重なりと置き換え</h2><div class="sub">割り算が出てくるのは、同じものを何回も数えているとき。何回数えたかは、1つを自分で動かしてみれば分かる。<br>道や分け方の問題は、別のものの並べ方に置き換えて数える。</div></div>`+
+ LABS.map(l=>`<button class="item" data-lab="${l.id}"><b>${l.t}</b><br><span class="sub">${l.d}</span></button>`).join('');
+}
+function labPerm(){
+ const s=L.perm,k=s.ch.length,left=s.n-k,doneAll=k===s.r;
+ const chips=[...Array(s.n).keys()].map(i=>`<button class="chip ${s.ch.includes(i)?'off':''}" style="background:${COL[i]}" data-pick="${i}" ${s.ch.includes(i)||doneAll?'disabled':''}>${NAME[i]}</button>`).join('');
+ const slots=[...Array(s.r).keys()].map(i=>i<k?`<span class="slot" style="background:${COL[s.ch[i]]};border-style:solid;border-color:transparent">${NAME[s.ch[i]]}</span>`:`<span class="slot ${i===k?'now':''}"></span>`).join('');
+ const nums=[...Array(k).keys()].map(i=>s.n-i);
+ let say;
+ if(doneAll)say=`できた式:<b>${nums.join(' × ')} = ${P(s.n,s.r)}</b>(= ${sub(s.n)}P${sub(s.r)})<br>だれを選んでも「残りの人数」は同じだった。だから掛け算で数えられる。`;
+ else say=`${k+1}番目の席:いま選べるのは <b>${left}人</b>(下で色がついている人を数える)<br>→ だからここに「<b>${left}</b>」と書ける。1人タップして座らせよう。`;
+ return back('lab')+`<div class="card"><h2>${s.n}人から${s.r}人を選んで1列に並べる</h2>
+ <div class="row">${slots}</div>
+ <div class="big">${nums.length?nums.join(' × ')+(doneAll?' = '+P(s.n,s.r):' × ?'):'?'}</div>
+ <div class="say">${say}</div>
+ <div class="row">${chips}</div>
+ <h3>人数を変えて試す</h3>
+ <div class="row"><button class="btn sm" data-pn="-1">人数−</button><span>${s.n}人</span><button class="btn sm" data-pn="1">人数＋</button>
+ <button class="btn sm" data-pr="-1">席−</button><span>${s.r}席</span><button class="btn sm" data-pr="1">席＋</button>
+ <button class="btn sm pri" data-preset="1">やり直す</button></div></div>
+ <div class="card"><h3>条件つきでも同じ</h3><div class="sub">「運転席は免許のある3人だけ」なら、運転席で色がついているのは3人 → 3 と書く。条件のきつい席から決めるのは、後回しにすると「残っている人数」が場合によって変わり、数字が1つに決まらなくなるから。</div></div>`;
+}
+const circKey=s=>{const i=s.indexOf('A');return s.slice(i)+s.slice(0,i)};
+const BP=[
+{n:'4人から2人を選ぶ(組合せ)',make:()=>permsR([...'ABCD'],2).map(p=>p.join('')),key:s=>[...s].sort().join(''),
+ f:'₄P₂ ÷ 2! = 12 ÷ 2 = 6 = ₄C₂',w:'選ぶだけなら AB と BA は同じ。選んだ2人の並べ方は 2! = 2 通りあるので、どの束もちょうど2個。'},
+{n:'5人から3人を選ぶ(組合せ)',make:()=>permsR([...'ABCDE'],3).map(p=>p.join('')),key:s=>[...s].sort().join(''),
+ f:'₅P₃ ÷ 3! = 60 ÷ 6 = 10 = ₅C₃',w:'選んだ3人の並べ方は 3! = 6 通り。どの束もちょうど6個だから、6で割れば束の数になる。'},
+{n:'a, a, b, c を1列に並べる(同じ文字)',make:()=>permsR(['a₁','a₂','b','c'],4).map(p=>p.join('')),key:s=>s.replace(/[₁₂₃]/g,''),
+ f:'4! ÷ 2! = 24 ÷ 2 = 12',w:'a に番号をつけて区別すると 4! 通り。番号を消すと a₁a₂ と a₂a₁ の入れ替え(2! 通り)が同じ並びになる。'},
+{n:'a, a, a, b を1列に並べる(同じ文字)',make:()=>permsR(['a₁','a₂','a₃','b'],4).map(p=>p.join('')),key:s=>s.replace(/[₁₂₃]/g,''),
+ f:'4! ÷ 3! = 24 ÷ 6 = 4',w:'3個の a の入れ替えは 3! = 6 通り。番号を消すと6個が1つに重なる。'},
+{n:'a, a, b, b を1列に並べる(同じ文字が2種類)',make:()=>permsR(['a₁','a₂','b₁','b₂'],4).map(p=>p.join('')),key:s=>s.replace(/[₁₂₃]/g,''),
+ f:'4! ÷ (2! × 2!) = 24 ÷ 4 = 6',w:'a の入れ替え 2! 通り × b の入れ替え 2! 通り = 4個が1つに重なる。'},
+{n:'4人が円卓に座る(円順列)',make:()=>permsR([...'ABCD'],4).map(p=>p.join('')),key:circKey,
+ f:'4! ÷ 4 = 6 = (4−1)!',w:'1列に書いた ABCD, BCDA, CDAB, DABC は、円にすると回しただけで同じ。回し方は人数と同じ4通り。A を固定して残り3人を並べる、と考えても同じ 3! になる。'},
+{n:'4色の玉で首飾りを作る(じゅず順列)',make:()=>permsR([...'ABCD'],4).map(p=>p.join('')),key:s=>{const r=circKey(s),v='A'+[...r.slice(1)].reverse().join('');return r<v?r:v},
+ f:'4! ÷ 4 ÷ 2 = 3',w:'回して同じ(4通り)に加えて、裏返して同じ(2通り)。1束は 4×2 = 8個。'},
+{n:'4人を2人ずつ2組に分ける(組分け)',make:()=>[['AB','CD'],['AC','BD'],['AD','BC'],['BC','AD'],['BD','AC'],['CD','AB']].map(x=>'A室'+x[0]+'・B室'+x[1]),key:s=>{const m=s.match(/A室(..)・B室(..)/);return[m[1],m[2]].sort().join(' と ')},
+ f:'₄C₂ ÷ 2! = 6 ÷ 2 = 3',w:'部屋に名前があれば6通り。名前を消すと「A室AB・B室CD」と「A室CD・B室AB」は同じ分け方。人数が同じ組が2つあるから 2! で割る。人数が違う組(3人と1人など)は人数で区別がつくので割らない。'},
+{n:'A, B, C, D を並べる。A は B より左(順序固定)',make:()=>permsR([...'ABCD'],4).map(p=>p.join('')),key:s=>s.replace(/[AB]/g,'○'),valid:s=>s.indexOf('A')<s.indexOf('B'),
+ f:'4! ÷ 2! = 12',w:'A, B を同じ文字 ○ とみなすと、1つの束に「A が左」「B が左」の2個が入る。条件に合うのは各束に1個だけ(色つき)。だから束の数がそのまま答え。'}
+];
+const sw=(t,x,y)=>t.split(x).join('\u0000').split(y).join(x).split('\u0000').join(y);
+const OPS=[
+ [{n:'2人の順番を入れかえる',f:t=>t[1]+t[0]}],
+ [{n:'左の2人を入れかえる',f:t=>t[1]+t[0]+t[2]},{n:'右の2人を入れかえる',f:t=>t[0]+t[2]+t[1]}],
+ [{n:'a₁ と a₂ を入れかえる',f:t=>sw(t,'a₁','a₂')}],
+ [{n:'a₁ と a₂ を入れかえる',f:t=>sw(t,'a₁','a₂')},{n:'a₂ と a₃ を入れかえる',f:t=>sw(t,'a₂','a₃')}],
+ [{n:'a₁ と a₂ を入れかえる',f:t=>sw(t,'a₁','a₂')},{n:'b₁ と b₂ を入れかえる',f:t=>sw(t,'b₁','b₂')}],
+ [{n:'全員が1つ左の席へ動く(回す)',f:t=>t.slice(1)+t[0]}],
+ [{n:'回す',f:t=>t.slice(1)+t[0]},{n:'裏返す',f:t=>t[0]+[...t.slice(1)].reverse().join('')}],
+ [{n:'部屋の名前 A・B を付けかえる',f:t=>{const m=t.match(/A室(..)・B室(..)/);return 'A室'+m[2]+'・B室'+m[1]}}],
+ [{n:'A と B の場所を入れかえる',f:t=>sw(t,'A','B')}]
+];
+const FM=[
+ {top:'₄P₂ = 4 × 3',topTxt:'4人から2人を、順番も区別して並べた数',bot:'2! = 2 × 1',botTxt:'選んだ2人の並べ方(入れかえても同じ組)',name:'₄C₂',gen:'ₙCᵣ = ₙPᵣ ÷ r!  「並べてから、選んだ r 個の並べかえで割る」'},
+ {top:'₅P₃ = 5 × 4 × 3',topTxt:'5人から3人を、順番も区別して並べた数',bot:'3! = 3 × 2 × 1',botTxt:'選んだ3人の並べ方(入れかえても同じ組)',name:'₅C₃',gen:'ₙCᵣ = ₙPᵣ ÷ r!  「並べてから、選んだ r 個の並べかえで割る」'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4文字を全部区別して並べた数',bot:'2!',botTxt:'a 2個の入れかえ(入れかえても同じ並び)',name:'4! ÷ 2!',gen:'同じものを含む順列 n! ÷ (p! q! …)  「全部区別して並べ、同じものの入れかえで割る」'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4文字を全部区別して並べた数',bot:'3! = 3 × 2 × 1',botTxt:'a 3個の入れかえ',name:'4! ÷ 3!',gen:'同じものを含む順列 n! ÷ (p! q! …)'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4文字を全部区別して並べた数',bot:'2! × 2!',botTxt:'a 2個の入れかえ × b 2個の入れかえ',name:'4! ÷ (2! 2!)',gen:'同じものを含む順列 n! ÷ (p! q! …)'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4人を1列に並べた数',bot:'4',botTxt:'回し方の数 = 人数',name:'(4−1)!',gen:'円順列 n! ÷ n = (n−1)!  「1列に並べて、回して同じになる n 個で割る」'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4個を1列に並べた数',bot:'4 × 2',botTxt:'回し方 4通り × 表裏 2通り',name:'(4−1)! ÷ 2',gen:'じゅず順列 (n−1)! ÷ 2  「円順列を、裏返しの 2 で割る」'},
+ {top:'₄C₂',topTxt:'A室に入る2人を選ぶ(残りが B室)',bot:'2!',botTxt:'部屋の名前の付けかえ(同じ人数の組が2つ)',name:'₄C₂ ÷ 2!',gen:'組分け:同じ人数の組が k 個あれば k! で割る。人数がちがう組は割らない'},
+ {top:'4! = 4 × 3 × 2 × 1',topTxt:'4人を1列に並べた数',bot:'2!',botTxt:'A と B の入れかえ(どちらか一方だけが条件に合う)',name:'4! ÷ 2!',gen:'順序が決まった r 個は同じ文字とみなす → n! ÷ r!'}
+];
+BP.forEach((b,i)=>{b.ops=OPS[i];b.circ=i===5||i===6;b.fm=FM[i]});
+function circSvg(t,cls){const R=52,c=80;let o='';
+ [...t].forEach((ch,k)=>{const a=-Math.PI/2+k*2*Math.PI/t.length,x=c+R*Math.cos(a),y=c+R*Math.sin(a);o+=`<circle cx="${x}" cy="${y}" r="17" fill="${COL[NAME.indexOf(ch)]}"/><text x="${x}" y="${y+6}" font-size="17" font-weight="700" text-anchor="middle" fill="#fff">${ch}</text>`});
+ return `<svg viewBox="0 0 160 160" width="160"><circle cx="${c}" cy="${c}" r="30" fill="var(--chip)" stroke="var(--line)" stroke-width="2"/><g class="${cls||''}" style="transform-origin:80px 80px">${o}</g></svg>`}
+function bAuto(){const s=L.bund,p=BP[s.i];if(!s.auto||S.tab!=='lab'||S.lab!=='bund')return;
+ const q=[[s.cur,[]]],seen=[s.cur];let path=null;while(q.length&&!path){const[x,ks]=q.shift();p.ops.forEach((o,k)=>{if(path)return;const y=o.f(x);if(!s.orb.includes(y))path=ks.concat(k);else if(!seen.includes(y)){seen.push(y);q.push([y,ks.concat(k)])}})}
+ if(!path){s.auto=false;return}
+ const k=path[0],x=p.ops[k].f(s.cur);s.dup=s.orb.includes(x);s.cur=x;if(!s.dup)s.orb.push(x);FX.bop=k;render();setTimeout(bAuto,750)}
+function labBund(){
+ const s=L.bund,p=BP[s.i],items=p.make(),groups={};
+ if(!s.orb||!items.includes(s.cur)){s.cur=items[0];s.orb=[items[0]]}
+ items.forEach(x=>{const k=p.key(x);(groups[k]=groups[k]||[]).push(x)});
+ const k0=p.key(s.orb[0]),keys=[k0].concat(Object.keys(groups).filter(k=>k!==k0)),per=items.length/keys.length,n=keys.length;
+ const full=s.orb.length>=per,mv=FX.bop!==undefined,opn=mv?p.ops[FX.bop].n:'',an=mv&&full,stp=Math.min(.35,2.6/n),gT=an?(n-1)*stp+.8:0;
+ const gc=i=>i===0?'#ffe58a':`hsl(${Math.round(200+(i-1)*300/Math.max(1,n-1))%360},65%,84%)`,dl=i=>an?`animation-delay:${(.6+i*stp).toFixed(2)}s`:'';
+ const tok=x=>{const gi=keys.indexOf(p.key(x)),inO=s.orb.includes(x);
+  if(!full)return `<span class="tok ${inO?'v':''} ${mv&&x===s.cur?'fxnew':''}">${esc(x)}</span>`;
+  return `<span class="tok ${gi===0?'v':(an?'gcA':'gc')} ${p.valid&&p.valid(x)?'':''}" style="--gc:${gc(gi)};${gi?dl(gi):''}${p.valid&&p.valid(x)?';outline:2px solid var(--acc)':''}">${esc(x)}</span>`};
+ let h=back('lab')+`<div class="card"><h2>同じものを、自分の手で作る</h2>
+ <select id="bsel">${BP.map((b,i)=>`<option value="${i}" ${i===s.i?'selected':''}>${b.n}</option>`).join('')}</select>
+ <div class="sub" style="margin-top:8px">区別して全部書き出すと ${items.length} 個ある(下の一覧)。その中の1つを動かして、「これと同じ」とみなすものを集める。</div>
+ ${p.circ?circSvg(s.cur,mv?(opn==='裏返す'?'fxflip':'fxrot'):''):`<div class="big ${mv?'fxpulse':''}" style="text-align:center;border-radius:10px">${esc(s.cur)}</div>`}
+ <div class="row">${p.ops.map((o,k)=>`<button class="btn pri" data-bop="${k}">${o.n}</button>`).join('')}</div>
+ <div class="say ${an?'fxpulse':''}">「${esc(s.orb[0])}」と同じものが <b>${s.orb.length}個</b> 見つかった(黄色)。${full?`<br>これ以上動かしても新しいものは出てこない。「${esc(s.orb[0])}」と同じものは、この <b>${per}個</b>で全部。`
+  :`${s.dup?'<br>いまの並びは、もう見つけてあるもの。':''}<br>まだ <b>全部ではない</b>。${p.ops.length>1?'ボタンを交互に押すと、新しいものが出てくる。':'もう一度動かしてみよう。'}`}</div>
+ ${full?'':`<div class="row" style="margin-bottom:10px"><button class="btn sm" data-bauto="1">残りを自動で見つける</button><span class="sub">全部見つけると、続きが出る</span></div>`}
+ ${full?`<div class="say ${an?'kfade':''}" style="${an?'animation-delay:.4s':''}">では、残りの <b>${items.length-per}個</b>はどうなっているか。同じように動かして集めると、下の一覧が色ごとの束に分かれる。</div>`:''}
+ <div class="flat">${items.map(tok).join('')}</div></div>`;
+ if(full)h+=`<div class="card ${an?'fxin':''}"><h3 style="margin-top:0">できた束</h3>
+ <div class="flat">${keys.map((k,i)=>`<span class="bchip ${an?'kfade':''}" style="background:${gc(i)};${dl(i)}">${esc(k)}<small>${per}個</small></span>`).join('')}</div>
+ <div class="say ${an?'kfade':''}" style="${an?`animation-delay:${gT.toFixed(2)}s`:''}">${items.length}個の一覧が、<b>${per}個ずつ</b>の束 <b>${n}個</b>に分かれた。どの束も ${per}個。<br>束1つが「ちがうもの」1つ。だから、ちがうものは <b>${items.length} ÷ ${per} = ${n}</b>。${p.valid?'<br>赤い枠が、条件に合う並び。どの束にも1個ずつある。':''}</div>
+ ${fracCard(Object.assign({n:items.length,d:per,r:n},p.fm),an,gT+.5)}
+ <div class="row" style="margin-top:8px"><button class="btn" data-bg="1">${s.g?'束ごとの表を閉じる':'束ごとの表で見る'}</button></div>
+ ${s.g?keys.map((k,i)=>`<div class="bund ${FX.bg?'fxin':''}" style="animation-delay:${i*60}ms;background:${gc(i)}"><span class="k" style="color:#1d2733">${esc(k)}</span>${groups[k].map(x=>`<span class="tok" style="${p.valid&&p.valid(x)?'outline:2px solid var(--acc)':''}">${esc(x)}</span>`).join('')}</div>`).join('')+`<div class="why">${p.w}</div>`:''}</div>`;
+ return h;
+}
+function marks73(X,Y){return `<circle cx="${X(3)}" cy="${Y(2)}" r="6" fill="var(--main)"/><text x="${X(3)-16}" y="${Y(2)-6}" font-size="14" font-weight="700" fill="var(--main)">R</text>
+ <circle cx="${X(4)}" cy="${Y(4)}" r="6" fill="var(--main)"/><text x="${X(4)-16}" y="${Y(4)-6}" font-size="14" font-weight="700" fill="var(--main)">S</text>
+ <text x="${(X(4)+X(5))/2}" y="${Y(3)+6}" font-size="18" font-weight="700" text-anchor="middle" fill="var(--ng)">×</text>`}
+function fig73(){const u=36,pad=20,w=7,h=5,W=w*u+pad*2,H=h*u+pad*2,X=i=>pad+i*u,Y=j=>H-pad-j*u;let g='';
+ for(let i=0;i<=w;i++)g+=`<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(h)}" stroke="var(--sub)" stroke-width="1.5"/>`;
+ for(let j=0;j<=h;j++)g+=`<line x1="${X(0)}" y1="${Y(j)}" x2="${X(w)}" y2="${Y(j)}" stroke="var(--sub)" stroke-width="1.5"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}" width="${W}">${g}${marks73(X,Y)}<text x="${X(0)-14}" y="${Y(0)+14}" font-size="13" fill="var(--ink)">P</text><text x="${X(w)+4}" y="${Y(h)-4}" font-size="13" fill="var(--ink)">Q</text></svg>`}
+function miniPath(pts,w,h,o){o=o||{};const u=24,pad=9,W=w*u+pad*2,H=h*u+pad*2,X=i=>pad+i*u,Y=j=>H-pad-j*u;let g='';
+ for(let i=0;i<=w;i++)g+=`<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(h)}" stroke="var(--line)" stroke-width="1.5"/>`;
+ for(let j=0;j<=h;j++)g+=`<line x1="${X(0)}" y1="${Y(j)}" x2="${X(w)}" y2="${Y(j)}" stroke="var(--line)" stroke-width="1.5"/>`;
+ const sg=pts.slice(1).map((q,i)=>`<line x1="${X(pts[i][0])}" y1="${Y(pts[i][1])}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="${o.bad?'var(--sub)':'var(--acc)'}" stroke-width="4" stroke-linecap="round" class="kdraw2" style="stroke-dasharray:${u};stroke-dashoffset:${u};animation-delay:${((o.d||0)+i*.12).toFixed(2)}s"/>`).join('');
+ const x=o.bad?`<line x1="4" y1="4" x2="${W-4}" y2="${H-4}" stroke="var(--ng)" stroke-width="3"/><line x1="${W-4}" y1="4" x2="4" y2="${H-4}" stroke="var(--ng)" stroke-width="3"/>`:'';
+ return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="margin:0">${g}${sg}<circle cx="${X(0)}" cy="${Y(0)}" r="3" fill="var(--ink)"/><circle cx="${X(w)}" cy="${Y(h)}" r="3" fill="var(--ink)"/>${x}</svg>`}
+const strPts=t=>{let x=0,y=0;const p=[[0,0]];[...t].forEach(c=>{c==='→'?x++:y++;p.push([x,y])});return p};
+function pathIntro(){
+ const all=[...new Set(permsR(['→','→','↑','↑'],4).map(a=>a.join('')))],cell=(svg,cap,d)=>`<div class="fxin" style="text-align:center;animation-delay:${d}s">${svg}<div style="font-weight:700;font-size:14px;letter-spacing:2px">${cap}</div></div>`;
+ return back('lab')+`<div class="card"><h2>道を数える前に</h2><div>小さい街路(横2・縦2)で、左下から右上まで最短で行く道を数えたい。道を1本ずつ指でなぞって数えると、もれや重複が起きやすい。そこで、道を「別の数えやすいもの」に書きかえる。</div></div>
+ <div class="card"><h3 style="margin-top:0">① 最短の道は、右か上にしか進まない</h3>
+ <div class="row" style="justify-content:space-around">${cell(miniPath([[0,0],[1,0],[1,1],[2,1],[2,2]],2,2,{d:.2}),'最短',.1)}${cell(miniPath([[0,0],[1,0],[1,1],[0,1],[0,2],[1,2],[2,2]],2,2,{bad:1,d:.8}),'遠回り',.7)}</div>
+ <div class="sub">左や下に1回でも進むと、その分だけ余計に歩くことになる。だから1歩ごとの進み方は「→」か「↑」の2種類だけ。</div></div>
+ <div class="card"><h3 style="margin-top:0">② どの道も、→ が2回、↑ が2回</h3>
+ <div class="row" style="justify-content:space-around">${cell(miniPath(strPts('→→↑↑'),2,2,{d:.2}),'→ → ↑ ↑',.1)}${cell(miniPath(strPts('↑→↑→'),2,2,{d:.8}),'↑ → ↑ →',.7)}</div>
+ <div class="sub">右に2区画、上に2区画進まないと着かない。だから使う矢印の個数はどの道でも同じ。道によってちがうのは、<b>矢印を出す順番だけ</b>。</div></div>
+ <div class="card"><h3 style="margin-top:0">③ 道を全部かくと、矢印の並びも全部そろう</h3>
+ <div class="row" style="justify-content:space-around;gap:10px 4px">${all.map((t,i)=>cell(miniPath(strPts(t),2,2,{d:.2+i*.5}),[...t].join(' '),.1+i*.5)).join('')}</div>
+ <div class="say fxin" style="animation-delay:3.2s">道は 6本。下に書いた矢印の並びも 6通りで、同じ並びは1つもない。<br>道1本と、矢印の並び1つが、ぴったり組になっている。</div>
+ <div class="why fxin" style="animation-delay:3.6s">だから「道は何本か」は「→ → ↑ ↑ の4枚を並べる方法は何通りか」と同じ問題。<br>矢印の並べ方なら、同じ文字を含む並べ方として数えられる。道を全部かかなくてすむ。</div>
+ <div class="row"><button class="btn pri" data-pintro="0">大きい街路(横4・縦3)でやってみる</button></div></div>`;
+}
+function labPath(){
+ if(L.path.intro)return pathIntro();
+ const s=L.path,w=s.w,h=s.h,u=w>5?40:44,pad=20,W=w*u+pad*2,H=h*u+pad*2;
+ let x=0,y=0,pts=[[0,0]];s.m.forEach(c=>{c==='→'?x++:y++;pts.push([x,y])});
+ const X=i=>pad+i*u,Y=j=>H-pad-j*u;
+ let g='';for(let i=0;i<=w;i++)g+=`<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(h)}" stroke="var(--line)" stroke-width="2"/>`;
+ for(let j=0;j<=h;j++)g+=`<line x1="${X(0)}" y1="${Y(j)}" x2="${X(w)}" y2="${Y(j)}" stroke="var(--line)" stroke-width="2"/>`;
+ const nseg=pts.length-1,segs=pts.slice(1).map((q,i)=>{const a=pts[i],on=FX.mv==='all'||(FX.mv==='last'&&i===nseg-1);
+  return `<line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" ${on?`class="kdraw2" style="stroke-dasharray:${u};stroke-dashoffset:${u};animation-delay:${FX.mv==='all'?(i*.13).toFixed(2):0}s"`:''}/>`}).join('');
+ const arrows=s.m.map((c,i)=>{const on=FX.mv==='all'||(FX.mv==='last'&&i===nseg-1);return `<span class="${on?'kpop':''}" style="${on&&FX.mv==='all'?`animation-delay:${(i*.13).toFixed(2)}s`:''}">${c}</span>`}).join(' ');
+ const fin=x===w&&y===h;
+ return back('lab')+`<div class="card"><h2>P から Q への最短経路</h2><div class="row"><button class="btn sm" data-pintro="1">なぜ矢印の並びで考えるのか(説明に戻る)</button></div>
+ <svg viewBox="0 0 ${W} ${H}" width="${W}">${g}${segs}
+ ${s.q73?marks73(X,Y):''}<circle cx="${X(x)}" cy="${Y(y)}" r="7" fill="var(--acc)"/><text x="${X(0)-12}" y="${Y(0)+14}" font-size="13" fill="var(--ink)">P</text><text x="${X(w)+4}" y="${Y(h)-4}" font-size="13" fill="var(--ink)">Q</text></svg>
+ <div class="big">${arrows||'(矢印を押して進む)'}</div>
+ <div class="row"><button class="btn pri" data-mv="→" ${x>=w?'disabled':''}>→ 右へ</button><button class="btn pri" data-mv="↑" ${y>=h?'disabled':''}>↑ 上へ</button>
+ <button class="btn" data-mv="u" ${s.m.length?'':'disabled'}>1つ戻す</button><button class="btn" data-mv="r">別の道</button></div>
+ <div class="say ${fin&&FX.mv?'fxpulse':''}">${fin?`着いた。この道は「→ ${w}個と ↑ ${h}個」を並べた列ちょうど1つ分。<br>逆に、→${w}個・↑${h}個の列を1つ決めれば、道が1本決まる。`:`→ はあと ${w-x}回、↑ はあと ${h-y}回。どの道を通っても、使う矢印は → ${w}個、↑ ${h}個で変わらない。`}</div>
+ ${s.q73?(()=>{const has=(a,b)=>pts.some(p=>p[0]===a&&p[1]===b),bat=pts.some((p,i)=>i&&p[0]===5&&p[1]===3&&pts[i-1][0]===4&&pts[i-1][1]===3);
+ return `<div class="say">この道は R を<b>${has(3,2)?'通った':'通っていない'}</b>・S を<b>${has(4,4)?'通った':'通っていない'}</b>・× を<b>${bat?'通った':'通っていない'}</b><br><span class="sub">P→R は「→3個・↑2個」の列、R→Q は「→4個・↑3個」の列。前半と後半を別々に並べるので掛け算になる。</span></div>`})():''}
+ ${fin?`<div class="why ${FX.mv?'fxin':''}">道の数は、→ ${w}個と ↑ ${h}個の並べ方の数と同じ。全部で <b>${C(w+h,h)}</b> 本。なぜその数になるかは、下で矢印に番号を付けて確かめる。</div>`:''}
+ ${fin?(()=>{let a=0,b2=0;const lab=s.m.map(c=>c==='→'?'→'+sub(++a):'↑'+sub(++b2)),swp=lab.map(t=>t==='→₁'?'→₂':t==='→₂'?'→₁':t);
+  return `<div class="sub" style="margin-top:10px">矢印に番号を付けて、全部ちがうものとして区別してみる。</div><div class="mini">${lab.join(' ')}</div><div class="sub">→₁ と →₂ を入れかえた並び。番号はちがうが、道は同じ。</div><div class="mini">${swp.join(' ')}</div><div class="sub">こうして同じ道を何回も数えているので、その回数で割る。</div>`})():''}
+ ${fin?fracCard({n:fact(w+h),d:fact(w)*fact(h),r:C(w+h,h),top:(w+h)+'!',topTxt:'矢印 '+(w+h)+'個を全部区別して並べた数',bot:w+'! × '+h+'!',botTxt:'→ どうし、↑ どうしを入れかえても同じ道',name:sub(w+h)+'C'+sub(h),gen:'同じものを含む順列 n! ÷ (p! q!)。「↑ を置く場所を選ぶ」と見れば ₙCᵣ'},!!FX.mv):''}
+ <div class="row"><button class="btn sm" data-gw="-1">横−</button><span>横${w}</span><button class="btn sm" data-gw="1">横＋</button><button class="btn sm" data-gh="-1">縦−</button><span>縦${h}</span><button class="btn sm" data-gh="1">縦＋</button><button class="btn sm pri" data-g73="1">問題73の図</button></div></div>
+ <div class="card"><h3>条件つきの経路</h3><div class="sub">「R を通る」= (P→R の道の数) × (R→Q の道の数)。前半の列と後半の列を別々に並べるだけ。<br>「× を通らない」= (全部) − (× を通る)。× の区間の手前の点までと、先の点からで掛け算して引く。</div></div>`;
+}
+function labBars(){
+ const s=L.bars,tot=s.min1?7:10,n=tot+2,b=s.b.slice().sort((p,q)=>p-q);
+ let cells='';for(let i=0;i<n;i++)cells+=`<button class="cell ${b.includes(i)?'bar':''} ${b.includes(i)&&(FX.cell===i||FX.cellAll)?'fxpulse':''}" data-cell="${i}">${b.includes(i)?'｜':'○'}</button>`;
+ let msg;
+ if(b.length===2){const a=[b[0],b[1]-b[0]-1,n-1-b[1]].map(v=>v+(s.min1?1:0));msg=`柿 <b>${a[0]}</b>個・りんご <b>${a[1]}</b>個・みかん <b>${a[2]}</b>個(合計10個)${s.min1?'<br>※先に1個ずつ買った分を足してある':''}`}
+ else msg=`仕切り ｜ にしたい場所を <b>あと${2-b.length}か所</b> タップ。`;
+ return back('lab')+`<div class="card"><h2>3種類の果物から10個買う</h2>
+ <div class="sub">${s.min1?'どの果物も1個以上:先に1個ずつ買ってしまい、残り7個を自由に分ける。':'買わない果物があってもよい。'}</div>
+ <div class="cells">${cells}</div>
+ <div class="say ${b.length===2&&(FX.cell!==undefined||FX.cellAll)?'fxpulse':''}">${msg}</div>
+ <div class="row"><button class="btn" data-br="1">ランダムに置く</button><button class="btn" data-br="0">消す</button><button class="btn pri" data-bm="1">${s.min1?'0個OKに戻す':'どれも1個以上にする'}</button></div>
+ <div class="why">左から順に「柿｜りんご｜みかん」。3種類を分ける境目は2本。<br>買い方1つ ⇔ ○${tot}個と仕切り2本の並び1つ。<br>${n}か所から仕切りの2か所を選ぶので <b>${sub(n)}C${sub(2)} = ${C(n,2)}</b> 通り。</div>
+ ${b.length===2?(()=>{const row=(x,y)=>[...Array(n).keys()].map(i=>i===b[0]?x:i===b[1]?y:'○').join('');
+  return `<div class="sub" style="margin-top:10px">仕切りに ①② と番号を付けて区別してみる。</div><div class="mini">${row('①','②')}</div><div class="sub">①と②を入れかえた置き方。番号はちがうが、分け方は同じ。</div><div class="mini">${row('②','①')}</div>`})():''}
+ ${b.length===2?fracCard({n:n*(n-1),d:2,r:C(n,2),top:sub(n)+'P₂ = '+n+' × '+(n-1),topTxt:'仕切り2本を区別して、1本目・2本目と置いた数',bot:'2!',botTxt:'2本の仕切りを入れかえても同じ分け方',name:sub(n)+'C₂',gen:'重複組合せ:3種類から '+tot+'個 → ○ '+tot+'個と仕切り2本 → ₃H'+sub(tot)+' = '+sub(n)+'C'+sub(tot)+' = '+sub(n)+'C₂'},FX.cell!==undefined||!!FX.cellAll):''}</div>
+ <div class="card"><h3>同じ形の問題</h3><div class="sub">・りんご5個を3人に配る<br><span class="mini">○○｜○｜○○</span> は 2個・1個・2個。○5個と仕切り2本 → ₇C₂ = 21<br>
+・無記名投票8票が候補3人に分かれる<br><span class="mini">○○○｜○○○○｜○</span> は 3票・4票・1票。○8個と仕切り2本 → ₁₀C₂ = 45<br>
+・x+y+z=7(0以上の整数)<br><span class="mini">○○｜｜○○○○○</span> は x=2, y=0, z=5。○7個と仕切り2本 → ₉C₂ = 36<br>
+・x+y+z=9(1以上)。先に1ずつ配ると残りは6<br><span class="mini">○｜○○○｜○○</span> は残りが 1, 3, 2 なので x=2, y=4, z=3。○6個と仕切り2本 → ₈C₂ = 28<br>
+・さいころ3回で a≦b≦c<br><span class="mini">｜○○｜｜○｜｜</span> は、仕切り5本で 1〜6 の目の部屋を作り、○ を出た目の部屋に置いたもの。これは (2, 2, 4)。○3個と仕切り5本 → ₈C₃ = 56</div></div>`;
+}
+const back=t=>`<button class="back" data-back="${t}">‹ 一覧に戻る</button>`;
+
+/* ---------- 数える ---------- */
+const K=[
+{id:'k39',ref:'問題集 39(2)',t:'5人乗りの車に A〜E の5人が乗る。免許を持っているのは A・B・C の3人だけ。乗り方は何通りか。',slots:['運転席','助手席','後ろ左','後ろ中','後ろ右'],pool:['A','B','C','D','E'],ok:a=>'ABC'.includes(a[0])},
+{id:'kend',ref:'初見',t:'男子3人(男1・男2・男3)と女子2人(女1・女2)が1列に並ぶ。両端が男子になる並び方は何通りか。',slots:['左端','2番目','真ん中','4番目','右端'],pool:['男1','男2','男3','女1','女2'],ok:a=>a[0][0]==='男'&&a[4][0]==='男'},
+{id:'kodd',ref:'初見',t:'0, 1, 2, 3, 4, 5 から異なる4個を使って4桁の整数を作る。奇数は何個か。',slots:['千の位','百の位','十の位','一の位'],pool:[0,1,2,3,4,5],ok:a=>a[0]!==0&&a[3]%2===1},
+{id:'k41',ref:'問題集 41(1)',t:'0, 1, 2, 3, 4 から異なる3個を使って3桁の整数を作る。偶数は何個か。',slots:['百の位','十の位','一の位'],pool:[0,1,2,3,4],ok:a=>a[0]!==0&&a[2]%2===0},
+{id:'k42a',ref:'問題集 42(1)',t:'1〜6 から異なる4個を使って4桁の整数を作る。4300 より大きいものは何個か。',slots:['千の位','百の位','十の位','一の位'],pool:[1,2,3,4,5,6],ok:a=>+a.join('')>4300},
+{id:'k42b',ref:'問題集 42(2)',t:'1〜6 から異なる4個を使って4桁の整数を作る。5000 より大きい偶数は何個か。',slots:['千の位','百の位','十の位','一の位'],pool:[1,2,3,4,5,6],ok:a=>a[0]>=5&&a[3]%2===0}
+];
+const TC=['#2f6fb0','#c8553d','#2e7d5b','#b07d1a','#7b4fa3','#3c8c94','#a8456f','#6b7a1f'];
+const G={i:null,all:[],ord:[],best:store.get('kbest2',{}),KB:{},play:null};
+function kOpen(i){const p=K[i];G.i=i;G.ord=[];G.play=null;G.all=(function gen(pre){if(pre.length===p.slots.length)return p.ok(pre)?[pre]:[];let o=[];p.pool.forEach(v=>{if(!pre.includes(v))o=o.concat(gen(pre.concat([v])))});return o})([])}
+function kGroups(n){const gs=[];n.ch.forEach(c=>{let g=gs.find(q=>q.s===c.sig);if(!g)gs.push(g={s:c.sig,c:[]});g.c.push(c)});return gs}
+function kTree(o){o=o||G.ord;const p=K[G.i];return(function mk(rows,d,v){const n={v,d,ch:[]};if(d<o.length)p.pool.forEach(x=>{const r=rows.filter(a=>a[o[d]]===x);if(r.length)n.ch.push(mk(r,d+1,x))});
+ const m={};n.ch.forEach(c=>{m[c.sig]=(m[c.sig]||0)+1});n.sig=n.ch.length?'('+Object.keys(m).sort().map(k=>m[k]+'*'+k).join('+')+')':'';return n})(G.all,0,null)}
+function kTerms(root,o){o=o||G.ord;const p=K[G.i],out=[];(function go(n,fac,label){if(!n.ch.length){out.push({fac,label,val:fac.reduce((a,b)=>a*b,1)});return}
+ const gs=kGroups(n);if(gs.length===1)go(gs[0].c[0],fac.concat(gs[0].c.length),label);
+ else gs.forEach(g=>go(g.c[0],fac.concat(g.c.length),(label?label+'、':'')+p.slots[o[n.d]]+'が '+g.c.map(c=>c.v).join('・')+' のとき'))})(root,[],'');return out}
+function kPaint(n,off){if(!n.ch.length){n.t=off;return 1}let o=off;kGroups(n).forEach(g=>{let k=1;g.c.forEach(c=>{k=kPaint(c,o)});o+=k});return o-off}
+function kBest(i){if(G.KB[i])return G.KB[i];const idx=K[i].slots.map((_,k)=>k);let b=null;permsR(idx,idx.length).forEach(o=>{const n=kTerms(kTree(o),o).length;if(!b||n<b.n)b={n,ord:o}});return G.KB[i]=b}
+function kLevel(root){const L=G.ord.length,par=[];(function f(n){if(n.d===L-1)par.push(n);n.ch.forEach(f)})(root);return[...new Set(par.map(n=>n.ch.length))]}
+function kSvg(root,an,nt,fac){
+ const p=K[G.i],L=G.ord.length,done=L===p.slots.length,W=366,x=d=>20+d*(W-44)/p.slots.length;let F=0,np=0;(function c(n){if(n.d===L-1)np++;if(!n.ch.length)F++;else n.ch.forEach(c)})(root);
+ const st=Math.max(3,Math.min(26,440/F)),H=F*st+46,dt=Math.min(.22,1.5/Math.max(1,np)),T=L?(np-1)*dt+.6:0;G.T=T;let li=0,pi=0,ln='',nd='',bd='',bg='';
+ (function lay(n){
+  if(!n.ch.length){n.y=38+li*st+st/2;n.span=st;li++;if(nt>1)bg+=`<rect x="${x(1)-16}" y="${(n.y-st/2).toFixed(1)}" width="${W-x(1)+16}" height="${(st+.4).toFixed(1)}" fill="${TC[n.t%8]}" ${an?`class="kband" style="animation-delay:${T.toFixed(2)}s"`:'opacity=".24"'}/>`}
+  else{n.ch.forEach(lay);n.y=(n.ch[0].y+n.ch[n.ch.length-1].y)/2;n.span=n.ch.reduce((a,c)=>a+c.span,0)}
+  const X=x(n.d),dl=(pi*dt).toFixed(2);
+  n.ch.forEach(c=>{const x2=x(c.d),len=Math.hypot(x2-X,c.y-n.y).toFixed(1),nw=an&&c.d===L;
+   ln+=`<line x1="${X}" y1="${n.y.toFixed(1)}" x2="${x2}" y2="${c.y.toFixed(1)}" stroke="${nw?'var(--acc)':'var(--sub)'}" stroke-width="${st<6?0.6:1.2}" ${nw?`class="kline" style="stroke-dasharray:${len};stroke-dashoffset:${len};animation-delay:${dl}s,${(T+.4).toFixed(2)}s"`:''}/>`});
+  if(n.d===L-1&&L){if(n.span>=14)bd+=`<text x="${X+(n.d?13:6)}" y="${n.y-(n.d?10:9)}" font-size="10" font-weight="700" fill="var(--acc)" stroke="var(--card)" stroke-width="3" paint-order="stroke" ${an?`class="kfade" style="animation-delay:${(pi*dt+.35).toFixed(2)}s"`:''}>${n.ch.length}本</text>`;pi++}
+  let m;const t=String(n.v);
+  if(n.d===0)m=`<circle cx="${X}" cy="${n.y}" r="4" fill="var(--sub)"/>`;
+  else if(n.span>=19)m=`<circle cx="${X}" cy="${n.y}" r="9.5" fill="var(--main)"/><text x="${X}" y="${n.y+3.5}" font-size="${t.length>1?8.5:11}" font-weight="700" text-anchor="middle" fill="var(--card)">${t}</text>`;
+  else if(n.span>=10)m=`<text x="${X}" y="${n.y+3.5}" font-size="10" font-weight="700" text-anchor="middle" fill="var(--main)" stroke="var(--card)" stroke-width="3" paint-order="stroke">${t}</text>`;
+  else m=`<circle cx="${X}" cy="${n.y}" r="1.7" fill="var(--main)"/>`;
+  nd+=an&&n.d===L&&L?`<g class="kfade" style="animation-delay:${(pi*dt+.3).toFixed(2)}s">${m}</g>`:m;
+ })(root);
+ let hd='';G.ord.forEach((sl,d)=>{hd+=`<text x="${x(d+1)}" y="12" font-size="10" text-anchor="middle" fill="var(--sub)">${p.slots[sl]}</text>`;
+  if(fac&&fac[d]!==undefined)hd+=`<text x="${(x(d)+x(d+1))/2}" y="27" font-size="11" font-weight="700" text-anchor="middle" fill="var(--acc)" ${an&&d===L-1?`class="kfade" style="animation-delay:${T.toFixed(2)}s"`:''}>${d?'×':''}${fac[d]}</text>`});
+ const sw=an&&done?`<rect class="ksweep" x="${x(L)-9}" y="38" width="18" height="${Math.max(st,6).toFixed(1)}" rx="3" fill="var(--acc)" style="--d:${(F*st-Math.max(st,6)).toFixed(1)}px;animation-delay:${T.toFixed(2)}s"/>`:'';
+ return `<svg viewBox="0 0 ${W} ${H}" width="${W}">${bg}${hd}${ln}${nd}${bd}${sw}</svg>`}
+function kMenu(){
+ return `<div class="card"><h2>樹形図を描いて数える</h2><div>紙に書く樹形図を、画面の上で左から1列ずつ描いていく。式は出てこない。描いた図の「線の本数」を読むと、それが式になる。</div>
+ <div class="why" style="margin-top:10px">どの ○ からも同じ本数の線が出ていれば、その本数を掛ける。○ によって本数がちがえば、図が色で分かれる。色ごとに数えて足す。</div>
+ <div class="sub">どの場所から決めるかは自由。順番を変えると、図の形と色の数が変わる。</div></div>`+
+ K.map((p,i)=>{const b=G.best[p.id];return `<button class="item" data-kopen="${i}">${b!==undefined?`<span class="done">✓ ${b}色で描けた</span>`:''}<span class="tag">${p.ref}</span><br>${p.t}</button>`}).join('');
+}
+function kView(){
+ const p=K[G.i],L=G.ord.length,done=L===p.slots.length,root=kTree(),terms=kTerms(root),nt=terms.length,cs=L?kLevel(root):[],tot=terms.reduce((a,t)=>a+t.val,0),an=G.anim&&L>0;
+ kPaint(root,0);const svg=kSvg(root,an,nt,nt===1?terms[0].fac:null),dly=an?`animation-delay:${G.T.toFixed(2)}s`:'',fd=an?'kfade':'';G.anim=false;G.cnt=an&&done;
+ if(done){const b=G.best[p.id];if(b===undefined||nt<b){G.best[p.id]=nt;store.set('kbest2',G.best)}}
+ let say;
+ if(!L)say='樹形図を左から描いていく。最初に決める場所をタップ。';
+ else{const nm=p.slots[G.ord[L-1]];
+  say=cs.length===1?(L===1?`スタートから線が <b>${cs[0]}本</b> 出た。「${nm}」に置けるものが ${cs[0]}通りあるということ。だから最初の数字は「<b>${cs[0]}</b>」。`:`「${nm}」の列が描けた。1つ前の列のどの ○ からも、線が <b>${cs[0]}本</b>ずつ出ている。だから「<b>× ${cs[0]}</b>」と書ける。`)
+   :`「${nm}」の列が描けた。1つ前の列の ○ によって、出ている線の本数がちがう(<b>${cs.slice().sort((a,b)=>a-b).join('本と')}本</b>)。1つの数字では書けない。`;
+  if(nt>1)say+=`<br>形のちがう所を色で分けた。いま <b>${nt}色</b>。同じ色の所は形が同じ。`;
+  say+=done?`<br>右端まで描けた。右端の数を数えると <b id="kc">${G.all.length}</b>。`:(G.play?'':'<br>次に決める場所をタップ。');}
+ const line=(t,k)=>`<div style="margin:4px 0">${nt>1?`<span class="sw" style="background:${TC[k%8]}"></span>`:''}${t.label?`<span class="sub">${t.label}</span><br>`:''}<b style="font-size:19px">${t.fac.length?t.fac.slice(0,-1).map(f=>f+' × ').join('')+`<span class="${an?'kpop':''}" style="${dly}">${t.fac[t.fac.length-1]}</span>`:'?'}${done?`<span class="${fd}" style="${an?`animation-delay:${(G.T+1.5).toFixed(2)}s`:''}"> = ${t.val}</span>`:(t.fac.length?' × …':'')}</b></div>`;
+ let end='';
+ if(done){const b=kBest(G.i),nat=b.ord.map(k=>p.slots[k]).join(' → ');
+  if(nt===1)end='<b>図は1色。</b>どの列でも、○ から出る線の本数がそろっていた。だから掛け算だけで数えられた。';
+  else{end=`<b>図が ${nt}色に分かれた。</b>同じ色の所は形が同じなので、まとめて掛け算で数えられる。色ごとに数えて、最後に足す。上の式の色と、図の色が対応している。<br>`;
+   end+=nt>b.n?`この問題は、決める順番を変えると <b>${b.n}色</b>${b.n===1?'(掛け算だけ)':''}で描ける。<div class="row" style="margin-top:8px"><button class="btn pri" data-kbest="1">色がいちばん少ない描き方を見る</button></div>`
+    :`これが、いちばん色の少ない描き方。この問題は、どの順番で決めても ${b.n}色より減らない。分けて足すしかない問題。`}}
+ return back('cnt')+`<div class="card"><span class="tag" style="font-size:11px;background:var(--chip);color:var(--main);border-radius:6px;padding:1px 7px">${p.ref}</span><div style="margin-top:6px"><b>${p.t}</b></div></div>
+ <div class="card"><h3 style="margin-top:0">図から読んだ式</h3>${terms.map(line).join('')}${done?`<div class="big ${fd}" style="${an?`animation-delay:${(G.T+1.6).toFixed(2)}s`:''}">${nt>1?terms.map(t=>t.val).join(' + ')+' = ':''}${tot} 通り</div>`:''}</div>
+ ${done?kFormula(terms,an,G.T+2.2):''}
+ <div class="card"><div class="say ${fd}" style="margin-top:0;${dly}">${say}</div>
+ <div class="row" style="gap:5px">${p.slots.map((n,i)=>{const k=G.ord.indexOf(i);return `<button class="kslot ${k>=0?'fix':''}" data-ko="${i}" ${k>=0?'disabled':''}><span>${n}</span><b style="font-size:13px">${k>=0?(k+1)+'列目':'決める'}</b></button>`}).join('')}</div>
+ <div class="row" style="margin-top:8px"><button class="btn sm" data-kundo="1" ${L?'':'disabled'}>1列消す</button><button class="btn sm" data-kopen="${G.i}" ${L?'':'disabled'}>最初から描き直す</button>${done&&G.i+1<K.length?`<button class="btn sm pri" data-kopen="${G.i+1}">次の問題</button>`:''}</div>
+ ${svg}
+ ${done?`<div class="why ${fd}" style="${an?`animation-delay:${(G.T+1.8).toFixed(2)}s`:''}">${end}</div>`:''}</div>`;
+}
+function fracCard(o,an,base){const d=x=>an?`animation-delay:${(x+(base||0)).toFixed(2)}s`:'',c=an?'fxin':'';
+ return `<div class="frac"><div class="sub ${c}" style="${d(0)}">公式の形に結びつける</div>
+ <div class="fr1 ${c}" style="${d(.3)}"><b>${o.n}</b><span>${o.top}<br><small>${o.topTxt}</small></span></div>
+ <div class="frbar ${an?'fbA':''}" style="${d(.8)}"></div>
+ <div class="fr2 ${c}" style="${d(1.1)}"><b>${o.d}</b><span>${o.bot}<br><small>${o.botTxt}</small></span></div>
+ <div class="fres ${c}" style="${d(1.7)}">= <b>${o.r}</b> → 公式の形 <b class="acc ${an?'kpop':''}" style="${d(2.1)}">${o.name}</b></div>
+ <div class="sub ${c}" style="${d(2.5)}">${o.gen}</div></div>`}
+function kRuns(fac){const out=[];let i=0;while(i<fac.length){let j=i;while(j+1<fac.length&&fac[j+1]===fac[j]-1&&fac[j+1]>=1)j++;out.push(fac.slice(i,j+1));i=j+1}
+ return out.length>1?out.filter(r=>!(r.length===1&&r[0]===1)):out}
+function kFormula(terms,an,base,inl){const nt=terms.length,d=x=>an?`animation-delay:${(base+x).toFixed(2)}s`:'';let any=false;
+ const rows=terms.map((t,k)=>{const gs=kRuns(t.fac).map(r=>{if(r.length<2)return `<span class="fg"><span>${r[0]}</span></span>`;any=true;
+   const lab=r.length===r[0]?r[0]+'!':sub(r[0])+'P'+sub(r.length);
+   return `<span class="fg"><span>${r.join(' × ')}</span><span class="fb ${an?'fbA':''}" style="${d(.4+k*.3)}"></span><span class="fl ${an?'kpop':''}" style="${d(.8+k*.3)}">${lab}</span></span>`}).join('<span>×</span>');
+  return `<div class="frow">${nt>1?`<span class="sw" style="background:${TC[k%8]};margin-top:5px"></span>`:''}${gs}<span>= ${t.val}</span></div>`}).join('');
+ return `<div class="${inl?'frac':'card'} ${an?'kfade':''}" style="${d(0)}"><h3 style="margin-top:0">公式の形に結びつける</h3>${rows}
+ <div class="sub">${any?'樹形図で、列を進むごとに線の本数が <b>1本ずつ減っていった所</b>をまとめたものが、P や ! になる。<br>・ₙPᵣ:n から1ずつ減らしながら r 個掛ける<br>・n!:n から 1 まで全部掛ける':'この式には、1ずつ減っていく並びがない。公式の形にはまとめず、このまま計算する。'}</div></div>`}
+function kPlay(){if(!G.play||S.tab!=='cnt'||G.i===null)return;if(!G.play.length){G.play=null;render();return}G.ord.push(G.play.shift());G.anim=true;render();setTimeout(kPlay,(G.T+1)*1000)}
+
+/* ---------- 汎用の樹形図(確認・初見で使う) ---------- */
+const fat=(l,m)=>[{l,m}];
+const cmbs=(arr,k)=>k===0?[[]]:arr.flatMap((x,i)=>cmbs(arr.slice(i+1),k-1).map(c=>[x].concat(c)));
+function slotSpec(slots,pool,ok,ord){const all=(function gen(pre){if(pre.length===slots.length)return ok(pre)?[pre]:[];let o=[];pool.forEach(v=>{if(!pre.includes(v))o=o.concat(gen(pre.concat([v])))});return o})([]);
+ ord=ord||slots.map((_,i)=>i);return{cols:ord.map(i=>slots[i]),gen:path=>{const d=path.length,rows=all.filter(a=>path.every((v,i)=>a[ord[i]]===v));return pool.filter(x=>rows.some(a=>a[ord[d]]===x))}}}
+function tBuild(sp,L){return(function mk(path,v,m){const n={v,m:m||1,d:path.length,ch:[]};if(n.d<L)sp.gen(path).forEach(o=>{const l=o&&o.l!==undefined?o.l:o;n.ch.push(mk(path.concat([l]),l,o&&o.m))});
+ const c={};n.ch.forEach(x=>{const k=x.m+':'+x.sig;c[k]=(c[k]||0)+1});n.sig=n.ch.length?'('+Object.keys(c).sort().map(k=>c[k]+'*'+k).join('+')+')':'';return n})([],null,1)}
+const tGroups=n=>{const gs=[];n.ch.forEach(c=>{const k=c.m+':'+c.sig;let g=gs.find(q=>q.s===k);if(!g)gs.push(g={s:k,c:[]});g.c.push(c)});return gs};
+function tTerms(root,sp){const out=[];(function go(n,fac,label){if(!n.ch.length){out.push({fac,label,val:fac.reduce((a,b)=>a*b,1)});return}
+ const gs=tGroups(n),f=g=>g.c[0].m>1?(g.c.length>1?[g.c.length,g.c[0].m]:[g.c[0].m]):[g.c.length];
+ if(gs.length===1)go(gs[0].c[0],fac.concat(f(gs[0])),label);
+ else gs.forEach(g=>go(g.c[0],fac.concat(f(g)),(label?label+'、':'')+sp.cols[n.d]+'が '+(g.c.length>4?g.c.slice(0,3).map(c=>c.v).join('・')+' など'+g.c.length+'個':g.c.map(c=>c.v).join('・'))+' のとき'))})(root,[],'');return out}
+function tPaint(n,off){if(!n.ch.length){n.t=off;return 1}let o=off;tGroups(n).forEach(g=>{let k=1;g.c.forEach(c=>{k=tPaint(c,o)});o+=k});return o-off}
+function tLevel(root,L){const par=[];(function f(n){if(n.d===L-1)par.push(n);n.ch.forEach(f)})(root);return[...new Set(par.map(n=>n.ch.reduce((a,c)=>a+c.m,0)))]}
+function tSvg(root,sp,L,an,nt,fac){
+ const N=sp.cols.length,W=366,x=d=>20+d*(W-44)/N;let F=0,np=0;(function c(n){if(n.d===L-1)np++;if(!n.ch.length)F++;else n.ch.forEach(c)})(root);
+ const st=Math.max(3,Math.min(26,440/F)),H=F*st+46,dt=Math.min(.22,1.5/Math.max(1,np)),T=L?(np-1)*dt+.6:0;let li=0,pi=0,ln='',lx='',nd='',bd='',bg='';
+ const halo='stroke="var(--card)" stroke-width="3" paint-order="stroke"';
+ (function lay(n){
+  if(!n.ch.length){n.y=38+li*st+st/2;n.span=st;li++;if(nt>1)bg+=`<rect x="${x(1)-16}" y="${(n.y-st/2).toFixed(1)}" width="${W-x(1)+16}" height="${(st+.4).toFixed(1)}" fill="${TC[n.t%8]}" ${an?`class="kband" style="animation-delay:${T.toFixed(2)}s"`:'opacity=".24"'}/>`}
+  else{n.ch.forEach(lay);n.y=(n.ch[0].y+n.ch[n.ch.length-1].y)/2;n.span=n.ch.reduce((a,c)=>a+c.span,0)}
+  const X=x(n.d),dl=(pi*dt).toFixed(2);
+  n.ch.forEach(c=>{const x2=x(c.d),len=Math.hypot(x2-X,c.y-n.y).toFixed(1),nw=an&&c.d===L;
+   const el=`<line x1="${X}" y1="${n.y.toFixed(1)}" x2="${x2}" y2="${c.y.toFixed(1)}" stroke="${nw||c.ex?'var(--acc)':'var(--sub)'}" stroke-width="${c.m>1?4:c.ex?2.6:(st<6?0.6:1.2)}" stroke-linecap="round" ${nw?(c.ex?`class="kdraw2" style="stroke-dasharray:${len};stroke-dashoffset:${len};animation-delay:${dl}s"`:`class="kline" style="stroke-dasharray:${len};stroke-dashoffset:${len};animation-delay:${dl}s,${(T+.4).toFixed(2)}s"`):''}/>`;if(c.ex)lx+=el;else ln+=el;
+   if(c.m>1&&c.span>=10&&!(fac&&fac.length===L))bd+=`<text x="${(X+x2)/2}" y="${((n.y+c.y)/2-5).toFixed(1)}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--acc)" ${halo} ${nw?`class="kfade" style="animation-delay:${(pi*dt+.35).toFixed(2)}s"`:''}>×${c.m}</text>`});
+  if(n.d===L-1&&L){if(n.span>=14&&!n.ch.some(c=>c.m>1))bd+=`<text x="${X+(n.d?13:6)}" y="${n.y-(n.d?10:9)}" font-size="10" font-weight="700" fill="var(--acc)" ${halo} ${an?`class="kfade" style="animation-delay:${(pi*dt+.35).toFixed(2)}s"`:''}>${n.ch.length}本</text>`;pi++}
+  let m;const t=String(n.v);
+  if(n.d===0)m=`<circle cx="${X}" cy="${n.y}" r="4" fill="var(--sub)"/>`;
+  else if(t.length<=2&&n.span>=19)m=`<circle cx="${X}" cy="${n.y}" r="9.5" fill="var(--main)"/><text x="${X}" y="${n.y+3.5}" font-size="${t.length>1?8.5:11}" font-weight="700" text-anchor="middle" fill="var(--card)">${t}</text>`;
+  else if(n.span>=10)m=`<text x="${X}" y="${n.y+3.5}" font-size="${t.length>4?8:10}" font-weight="700" text-anchor="middle" fill="var(--main)" ${halo}>${t}</text>`;
+  else m=`<circle cx="${X}" cy="${n.y}" r="1.7" fill="var(--main)"/>`;
+  nd+=an&&n.d===L&&L?`<g class="kfade" style="animation-delay:${(pi*dt+.3).toFixed(2)}s">${m}</g>`:m;
+ })(root);
+ let hd='';for(let d=0;d<L;d++){hd+=`<text x="${x(d+1)}" y="12" font-size="9" text-anchor="middle" fill="var(--sub)">${sp.cols[d]}</text>`;
+  if(fac&&fac.length===L)hd+=`<text x="${(x(d)+x(d+1))/2}" y="27" font-size="11" font-weight="700" text-anchor="middle" fill="var(--acc)" ${an&&d===L-1?`class="kfade" style="animation-delay:${T.toFixed(2)}s"`:''}>${d?'×':''}${fac[d]}</text>`}
+ return{svg:`<svg viewBox="0 0 ${W} ${H}" width="${W}">${bg}${hd}${ln}${lx}${nd}${bd}</svg>`,T}}
+function treeCard(sp,L,an){
+ const N=sp.cols.length,done=L>=N,root=tBuild(sp,L),terms=tTerms(root,sp),nt=terms.length;tPaint(root,0);
+ const ex=[];{let n=root;while(n.ch.length){n=n.ch[Math.floor((n.ch.length-1)/2)];n.ex=1;ex.push(n.v)}}
+ const scn=sp.sc?`<div class="scene"><div class="sgap">${L?'樹形図の赤い道が表している1通りを、絵にしたもの':'この問題の場面'}</div>${sp.sc(ex,L,i=>an&&i===L-1?'fxpulse':'')}</div>`:'';
+ const cs=L?tLevel(root,L):[],r=tSvg(root,sp,L,an,nt,nt===1?terms[0].fac:null),T=r.T,tot=terms.reduce((a,t)=>a+t.val,0),fd=an?'kfade':'',dly=an?`animation-delay:${T.toFixed(2)}s`:'';
+ let say='';
+ if(L){const nm=sp.cols[L-1],ft=root.d===0&&(function f(n){return n.d===L-1?n.ch.some(c=>c.m>1):n.ch.length?f(n.ch[0]):false})(root);
+  say=cs.length===1?(ft?`「${nm}」は、<b>${cs[0]}通り</b>を1本の太い線にまとめて描いた。だから「<b>${L>1?'× ':''}${cs[0]}</b>」。`:L===1?`スタートから線が <b>${cs[0]}本</b> 出た。だから最初の数字は「<b>${cs[0]}</b>」。`:`「${nm}」の列が描けた。1つ前の列のどの ○ からも、線が <b>${cs[0]}本</b>ずつ出ている。だから「<b>× ${cs[0]}</b>」。`)
+   :`「${nm}」の列が描けた。1つ前の列の ○ によって、出ている数がちがう(<b>${cs.slice().sort((a,b)=>a-b).join('・')}</b>)。1つの数字では書けない。`;
+  if(nt>1)say+=`<br>形のちがう所を色で分けた。いま <b>${nt}色</b>。色ごとに数えて足す。`}
+ const line=(t,k)=>`<div style="margin:3px 0">${nt>1?`<span class="sw" style="background:${TC[k%8]}"></span>`:''}${t.label?`<span class="sub">${t.label}</span><br>`:''}<b style="font-size:17px">${t.fac.join(' × ')} = ${t.val}</b></div>`;
+ let h=scn+(say?`<div class="say ${fd}" style="${dly}">${say}</div>`:'')+(L?r.svg:'');
+ if(done)h+=`<div class="${fd}" style="${an?`animation-delay:${(T+.5).toFixed(2)}s`:''}"><div class="sub">図から読んだ式</div>${terms.map(line).join('')}${nt>1?`<div class="big" style="font-size:19px">${terms.map(t=>t.val).join(' + ')} = ${tot}</div>`:''}</div>`+kFormula(terms,an,T+1,1);
+ return{html:h,T,done,tot,nt}}
+const TS={
+ '39':()=>slotSpec(K[0].slots,K[0].pool,K[0].ok),
+ '41a':()=>slotSpec(K[3].slots,K[3].pool,K[3].ok,[2,0,1]),
+ '41b':()=>({cols:['使う3個','百の位','十の位','一の位'],gen:p=>p.length===0?['012','024','123','234']:[...p[0]].filter(c=>!p.slice(1).includes(c)&&!(p.length===1&&c==='0'))}),
+ '42a':()=>slotSpec(K[4].slots,K[4].pool,K[4].ok),
+ '42b':()=>slotSpec(K[5].slots,K[5].pool,K[5].ok,[0,3,1,2]),
+ '43':()=>({cap:'すきまは左から ①〜⑥',cols:['女子の並び','男1','男2','男3'],gen:p=>p.length===0?fat('5!',120):[...'①②③④⑤⑥'].filter(c=>!p.includes(c))}),
+ '45':()=>({cols:['間の1つ目','間の2つ目','左右','全体の並び'],gen:p=>p.length<2?[...'qutions'].filter(c=>!p.includes(c)):p.length===2?['e‥a','a‥e']:fat('6!',720)}),
+ '51':()=>({cap:'(1) 6個並べる',cols:['1個目','2個目','3個目','4個目','5個目','6個目'],gen:()=>['○','×']}),
+ '55':()=>({cap:'(2) 男女が交互。女子の席は ①〜④',cols:['男子の輪','女1','女2','女3','女4'],gen:p=>p.length===0?fat('3!',6):[...'①②③④'].filter(c=>!p.includes(c))}),
+ '59':()=>({cols:['桁数','上の位','次の位','その次'],gen:p=>{const k=p[0];if(!p.length)return['1桁','2桁','3桁'];if(k==='1桁')return p.length===1?[1,2,3]:['-'];if(k==='2桁')return p.length===1?[1,2,3]:p.length===2?[0,1,2,3]:['-'];return p.length===1?[1]:p.length===2?[0,1,2]:p[2]===2?[0,1,2]:[0,1,2,3]}}),
+ '61':()=>({cap:'(1) 部屋 A, B に入れる',cols:['1人目','2人目','3人目','残り7人'],gen:p=>p.length<3?['A','B']:fat('2⁷',128)}),
+ '70':()=>({cap:'(1) 1辺だけ共有。頂点は 1〜8',cols:['共有する辺','3つ目の頂点'],gen:p=>{if(!p.length)return[1,2,3,4,5,6,7,8].map(i=>i+'-'+(i%8+1));const a=+p[0].split('-')[0];return[1,2,3,4,5,6,7,8].filter(v=>![(a+6)%8+1,a,a%8+1,(a+1)%8+1].includes(v))}}),
+ '71':()=>({cap:'(3) 和が奇数',cols:['奇数・偶数の型','選び方'],gen:p=>!p.length?['奇奇奇','奇偶偶']:p[0]==='奇奇奇'?fat('₁₀C₃',120):fat('10×₁₀C₂',450)}),
+ '72':()=>({cap:'(2) 6人・4人・2人',cols:['6人の組','4人の組','2人の組'],gen:p=>p.length===0?fat('₁₂C₆',924):p.length===1?fat('₆C₄',15):['残り']}),
+ '74':()=>({cap:'(1) O と A が偶数番目',cols:['偶数番目','奇数番目'],gen:p=>!p.length?['OOAA','OAOA','OAAO','AOOA','AOAO','AAOO']:fat('4!',24)}),
+ '76':()=>({cap:'順列の数',cols:['E の個数','ほかの文字','並べ方'],gen:p=>{if(!p.length)return['E3個','E2個','全部ちがう'];if(p.length===1)return p[0]==='E3個'?[...'DFNS']:p[0]==='E2個'?cmbs([...'DFNS'],2).map(c=>c.join('')):cmbs([...'DEFNS'],4).map(c=>c.join(''));return p[0]==='E3個'?fat('4!÷3!',4):p[0]==='E2個'?fat('4!÷2!',12):fat('4!',24)}})
+};
+const DL={'55':['bund',5,'円順列の重なりを見る'],'61':['bund',7,'(3) の「2で割る」を重なりで見る'],'64':['bund',1,'「選ぶ」と「残す」を重なりで見る'],'68':['bund',4,'同じ文字の重なりを見る'],'72':['bund',7,'「同じ人数の組は割る」を重なりで見る'],'73':['path',73,'この図の上で道をかく'],'74':['bund',8,'(2)「この順にある」を重なりで見る'],'118':['bars',0,'○ と仕切りを動かす']};
+const QS=[
+ ()=>slotSpec(K[2].slots,K[2].pool,K[2].ok,[3,0,1,2]),
+ ()=>({cols:['全体の並び','大人の並び'],gen:p=>!p.length?fat('5!',120):permsR([...'ABC'],3).map(a=>a.join(''))}),
+ ()=>({cap:'すきまは ①〜⑤',cols:['子どもの並び','大人1','大人2','大人3'],gen:p=>!p.length?fat('4!',24):[...'①②③④⑤'].filter(c=>!p.includes(c))}),
+ ()=>({cap:'A, B のほかは C, D, E, F。A も B も入らない選び方は描かない',cols:['A・B','残りの係'],gen:p=>!p.length?['両方','Aだけ','Bだけ']:p[0]==='両方'?[...'CDEF']:cmbs([...'CDEF'],2).map(c=>c.join(''))}),
+ ()=>({cap:'組に A・B・C と名前を付けた場合',cols:['A組の3人','B組の3人','C組'],gen:p=>p.length===0?fat('₉C₃',84):p.length===1?fat('₆C₃',20):['残り'],div:{by:6,toks:['ABC','ACB','BAC','BCA','CAB','CBA'],why:'同じ3つの組に、名前 A・B・C を付ける方法が下の6通りある。名前を消すと、この6通りは同じ分け方。'}}),
+ ()=>({cap:'7か所のうち、S の3か所 → C の2か所 → 残りに U, E',cols:['S の3か所','C の2か所','U と E'],gen:p=>p.length===0?fat('₇C₃',35):p.length===1?fat('₄C₂',6):['U,E','E,U'],note:'7! ÷ (3! × 2!) = 420 と同じ値。'}),
+ ()=>({cap:'矢印は8個。そのうち ↑ を置く3か所を選べば道が決まる',cols:['↑ の3か所'],gen:()=>fat('₈C₃',56)}),
+ ()=>({cap:'○ 6個と仕切り2本で8か所。仕切りの2か所を選ぶ',cols:['仕切りの2か所'],gen:()=>cmbs([1,2,3,4,5,6,7,8],2).map(c=>c.join(','))}),
+ ()=>slotSpec(['百の位','十の位','一の位'],[1,2,3,4,5],a=>+a.join('')>320),
+ ()=>({cap:'A の席を固定。残りの席は順に ①〜⑤、A の向かいは ③',cols:['B の席','席①','席②','席④','席⑤'],gen:p=>!p.length?['③']:[...'CDEF'].filter(c=>!p.includes(c))}),
+ ()=>({cap:'先に1ずつ配る。残り7個の ○ と仕切り2本で9か所',cols:['仕切りの2か所'],gen:()=>cmbs([1,2,3,4,5,6,7,8,9],2).map(c=>c.join(','))}),
+ ()=>({cap:'5か所から A・B の入る2か所を選ぶ。左が A と決まる',cols:['A,B の2か所','残り3人'],gen:p=>!p.length?cmbs([1,2,3,4,5],2).map(c=>c.join(',')):fat('3!',6)}),
+ ()=>({cap:'6の目が1個も出ないものは描かない',cols:['大','中','小'],gen:p=>p.length<2||p.includes('6')?['6',{l:'6以外',m:5}]:['6']}),
+ ()=>({cap:'6か所のうち赤の3か所 → 白の2か所 → 残りが青',cols:['赤の3か所','白の2か所'],gen:p=>!p.length?cmbs([1,2,3,4,5,6],3).map(c=>c.join('')):cmbs([1,2,3,4,5,6].filter(x=>!p[0].includes(x)),2).map(c=>c.join(''))}),
+ ()=>({cols:['型','男子の並び','女子の並び'],gen:p=>!p.length?['男女男女男女','女男女男女男']:fat('3!',6)}),
+ ()=>({cap:'頂点は 1〜8。となりの頂点とは辺になるので結ばない',cols:['1つ目の頂点','結ぶ相手'],gen:p=>!p.length?[1,2,3,4,5,6,7,8]:[1,2,3,4,5,6,7,8].filter(v=>![(p[0]+6)%8+1,p[0],p[0]%8+1].includes(v)),div:{by:2,toks:['1 → 4','4 → 1'],why:'同じ対角線を、両はしのどちらから始めても描いている。'}}),
+ ()=>slotSpec(['百の位','十の位','一の位'],[0,1,2,3,4],a=>a[0]!==0&&a[2]===0,[2,0,1]),
+ ()=>({cap:'○ 5個と仕切り2本で7か所。仕切りの2か所を選ぶ',cols:['仕切りの2か所'],gen:()=>cmbs([1,2,3,4,5,6,7],2).map(c=>c.join(','))}),
+ ()=>({cap:'2人の組に X・Y と名前を付けた場合。4人の組のほかは a, b, c, d',cols:['4人の組','X組の2人','Y組'],gen:p=>p.length===0?fat('₈C₄',70):p.length===1?cmbs([...'abcd'],2).map(c=>c.join('')):['残り'],div:{by:2,toks:['X=ab・Y=cd','X=cd・Y=ab'],why:'2人の組が2つある。名前 X・Y を入れかえた下の2通りは、同じ分け方。'}}),
+ ()=>({cap:'すきまは ①〜⑤',cols:['c〜f の並び','a のすきま','b のすきま'],gen:p=>!p.length?fat('4!',24):[...'①②③④⑤'].filter(c=>!p.includes(c))})
+];
+const ch=(t,c,cls)=>`<span class="sc ${cls||''}" style="${c?'background:'+c:''}">${t}</span>`;
+const bx=(t,cap,cls)=>`<span class="sbx ${cls||''}"><b>${t}</b>${cap?`<small>${cap}</small>`:''}</span>`;
+const rw=h=>`<div class="srow">${h}</div>`,nt_=t=>`<div class="sgap">${t}</div>`,grp=(nm,h)=>`<span class="sgrp"><small>${nm}</small><span class="srow" style="margin:2px 0">${h||'&nbsp;'}</span></span>`;
+const RD='#c8553d',BL='#2f6fb0',GY='#8a8f98',GN='#2e7d5b',CIR='①②③④⑤⑥⑦⑧⑨';
+function slotScene(slots,pool,ord,o){o=o||{};return(e,L,nw)=>{const val={};ord.forEach((sl,i)=>{if(i<L)val[sl]=e[i]});const used=Object.values(val);
+ const box=i=>bx(i in val?val[i]:'?',slots[i]+(o.notes&&o.notes[i]?'<br>'+o.notes[i]:''),(i in val?'on ':'')+nw(ord.indexOf(i)));
+ return(o.head?nt_(o.head):'')+(o.rows||[slots.map((_,i)=>i)]).map(r=>rw(r.map(box).join(''))).join('')+rw(pool.map(x=>ch(x,o.col?o.col(x):null,used.includes(x)?'off':'')).join(''))+nt_('下の丸は手持ち。うすい丸は、もう置いたもの')}}
+const gapScene=(base,ins,bc)=>(e,L,nw)=>{let h='';for(let g=0;g<=base.length;g++){const k=ins.findIndex((_,i)=>i+1<L&&e[i+1]===CIR[g]);h+=k>=0?ch(ins[k],RD,nw(k+1)):`<span class="sgap">∨<br>${CIR[g]}</span>`;if(g<base.length)h+=ch(base[g],bc||BL)}
+ return rw(h)+nt_(L?'赤が、すきまに入れたもの':'∨ がすきま。両端もすきま')};
+function ring(items){const c=75,R=54;return `<svg viewBox="0 0 150 150" width="150"><circle cx="${c}" cy="${c}" r="32" fill="var(--chip)" stroke="var(--line)" stroke-width="2"/>${items.map((it,k)=>{const a=-Math.PI/2+k*2*Math.PI/items.length,x=c+R*Math.cos(a),y=c+R*Math.sin(a);
+ return `<g class="${it.cls||''}" style="transform-origin:${x}px ${y}px"><circle cx="${x}" cy="${y}" r="15" fill="${it.c||'var(--card)'}" stroke="var(--line)" stroke-width="${it.c?0:1.5}"/><text x="${x}" y="${y+4.5}" font-size="${String(it.t).length>1?10:13}" font-weight="700" text-anchor="middle" fill="${it.c?'#fff':'var(--sub)'}">${it.t}</text></g>`}).join('')}</svg>`}
+function poly8(lines,dots){const c=75,R=56,P=k=>{const a=-Math.PI/2+(k-1)*Math.PI/4;return[c+R*Math.cos(a),c+R*Math.sin(a)]};let h='';
+ for(let k=1;k<=8;k++){const a=P(k),b=P(k%8+1);h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--sub)" stroke-width="1.5"/>`}
+ lines.forEach(l=>{const a=P(l[0]),b=P(l[1]);h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${RD}" stroke-width="4" stroke-linecap="round"/>`});
+ for(let k=1;k<=8;k++){const a=P(k),on=(dots||[]).includes(k),tx=c+(R+12)*Math.cos(-Math.PI/2+(k-1)*Math.PI/4),ty=c+(R+12)*Math.sin(-Math.PI/2+(k-1)*Math.PI/4)+4;h+=`<circle cx="${a[0]}" cy="${a[1]}" r="${on?5:3}" fill="${on?RD:'var(--ink)'}"/><text x="${tx}" y="${ty}" font-size="11" text-anchor="middle" fill="var(--ink)">${k}</text>`}
+ return `<svg viewBox="-6 -6 162 162" width="150">${h}</svg>`}
+const barsScene=(n,names,plus,unit)=>(e,L,nw)=>{if(!L)return rw([...Array(n)].map(()=>bx('?','')).join(''))+nt_(n+'か所のうち2か所が仕切り ｜、残りが ○');
+ const[i,j]=e[0].split(',').map(Number),cnt=[i-1,j-i-1,n-j].map(v=>v+(plus||0));return rw([...Array(n)].map((_,k)=>bx(k+1===i||k+1===j?'｜':'○','',k+1===i||k+1===j?'on '+nw(0):'')).join(''))+nt_(names.map((nm,k)=>nm+' '+cnt[k]+unit).join('・')+(plus?'(先に配った1を足した数)':''))};
+const cells=(arr,on,cap)=>rw(arr.map((t,i)=>bx(t,cap?cap(i):'',on(i))).join(''));
+const SCN={
+ d39:slotScene(K[0].slots,K[0].pool,[0,1,2,3,4],{rows:[[0,1],[2,3,4]],notes:{0:'免許が必要'},col:x=>'ABC'.includes(x)?BL:GY,head:'車の座席。青い A・B・C が免許あり、灰色の D・E は免許なし'}),
+ d41a:slotScene(K[3].slots,K[3].pool,[2,0,1],{notes:{0:'0 は置けない',2:'偶数だけ'}}),
+ d41b:(e,L,nw)=>(L?rw([...e[0]].map(c=>ch(c,BL,L>1&&e.slice(1,L).includes(c)?'off':nw(0))).join(''))+nt_('選んだ3個。足すと '+[...e[0]].reduce((a,c)=>a+ +c,0)+' で3の倍数'):rw('01234'.split('').map(c=>ch(c,BL)).join(''))+nt_('この5個から、足して3の倍数になる3個を選ぶ'))+cells(['百の位','十の位','一の位'].map((_,i)=>i+1<L?e[i+1]:'?'),i=>(i+1<L?'on ':'')+nw(i+1),i=>['百の位','十の位','一の位'][i]),
+ d42a:slotScene(K[4].slots,K[4].pool,[0,1,2,3],{head:'4300 より大きい4桁の数を作る'}),
+ d42b:slotScene(K[5].slots,K[5].pool,[0,3,1,2],{notes:{0:'5 か 6',3:'偶数だけ'},head:'5000 より大きい偶数を作る'}),
+ d43:gapScene(['女','女','女','女','女'],['男1','男2','男3']),
+ d45:(e,L,nw)=>{const x=L>0?e[0]:'?',y=L>1?e[1]:'?',f=L>2&&e[2]==='a‥e',rest=[...'qutions'].filter(c=>c!==x&&c!==y);
+  return rw(rest.slice(0,2).map(c=>ch(c,GY)).join('')+`<span class="sblk">${ch(f?'a':'e',RD,nw(2))}${ch(x,BL,nw(0))}${ch(y,BL,nw(1))}${ch(f?'e':'a',RD,nw(2))}</span>`+rest.slice(2).map(c=>ch(c,GY)).join(''))+nt_('赤い枠が「e ○ ○ a」のかたまり。灰色は残りの文字(並び方は1つの例)')},
+ d51:(e,L,nw)=>cells([...Array(6)].map((_,i)=>i<L?e[i]:'?'),i=>(i<L?'on ':'')+nw(i),i=>(i+1)+'個目')+nt_('どの場所にも ○ か × を置ける'),
+ d55:(e,L,nw)=>rw(ring([0,1,2,3].flatMap(k=>{const g=[0,1,2,3].findIndex(i=>i+1<L&&e[i+1]===CIR[k]);return[{t:'男',c:BL},g>=0?{t:'女'+(g+1),c:RD,cls:nw(g+1)}:{t:CIR[k]}]})))+nt_('青の男子4人が先に輪を作った。その間の ①〜④ に女子が入る'),
+ d59:(e,L,nw)=>{if(!L)return rw(bx('?','')+bx('?','')+bx('?',''))+nt_('1桁・2桁・3桁のどれか。123 より小さい数');const n=+e[0][0],v=e.slice(1,L).filter(t=>t!=='-');return cells([...Array(n)].map((_,i)=>i<v.length?v[i]:'?'),i=>(i<v.length?'on ':'')+nw(i+1))+nt_(e[0]+'の数。使える数字は 0, 1, 2, 3(くり返し可)')},
+ d61:(e,L,nw)=>{const pp=[0,1,2].filter(i=>i<L),inA=pp.filter(i=>e[i]==='A'),inB=pp.filter(i=>e[i]==='B');return rw(grp('部屋 A',inA.map(i=>ch(i+1,BL,nw(i))).join(''))+grp('部屋 B',inB.map(i=>ch(i+1,RD,nw(i))).join('')))+rw([...Array(10)].map((_,i)=>ch(i+1,GY,i<Math.min(L,3)||L>3?'off':'')).join(''))+nt_(L>3?'残りの7人も、1人ずつ A か B に入る(2通りが7回)':'1人ずつ、A か B のどちらに入るかを決める')},
+ d70:(e,L)=>{const ab=L?e[0].split('-').map(Number):null;return rw(poly8(L>1?[ab,[ab[0],e[1]],[ab[1],e[1]]]:L?[ab]:[],L>1?[ab[0],ab[1],e[1]]:ab||[]))+nt_(L>1?'赤い三角形。八角形と共有する辺は1本だけ':L?'赤い辺を共有する。3つ目の頂点は、両隣を避ける':'八角形の頂点 1〜8 から3個を選んで三角形を作る')},
+ d71:(e,L,nw)=>L?rw([...e[0]].map((c,i)=>ch(c,c==='奇'?RD:BL,nw(0))).join(''))+nt_('3個の中身の型。赤が奇数、青が偶数。和は'+(e[0]==='奇奇奇'?'奇+奇+奇':'奇+偶+偶')+'で奇数'):rw('奇数 10個'.split(' ').map(t=>ch(t,RD)).join('')+'偶数 10個'.split(' ').map(t=>ch(t,BL)).join(''))+nt_('1〜20 には奇数が10個、偶数が10個ある'),
+ d72:(e,L,nw)=>rw(grp('6人の組',L>0?[1,2,3,4,5,6].map(i=>ch(i,BL,nw(0))).join(''):''))+rw(grp('4人の組',L>1?[7,8,9,10].map(i=>ch(i,RD,nw(1))).join(''):'')+grp('2人の組',L>2?[11,12].map(i=>ch(i,GN,nw(2))).join(''):''))+rw([...Array(12)].map((_,i)=>ch(i+1,GY,(L>0&&i<6)||(L>1&&i<10)||L>2?'off':'')).join(''))+nt_('分け方の1つの例。人数がちがうので、組は人数で見分けられる'),
+ d74:(e,L,nw)=>cells([...Array(8)].map((_,i)=>i%2?(L>0?e[0][(i-1)/2]:'?'):(L>1?'YKHM'[i/2]:'?')),i=>i%2?(L>0?'on '+nw(0):''):(L>1?nw(1):''),i=>(i+1)+'番目')+nt_(L>1?'奇数番目は Y, K, H, M の並べ方の1つの例':'色のついた偶数番目に O, O, A, A を置く'),
+ d76:(e,L,nw)=>{if(!L)return cells(['?','?','?','?'],()=>'')+nt_('D, E, E, E, F, N, S から4文字を取り出して並べる');const k=e[0]==='E3個'?3:e[0]==='E2個'?2:0,o=L>1?[...e[1]]:[...Array(4-k)].map(()=>'?');return cells([...Array(k)].map(()=>'E').concat(o),i=>i<k?'on '+nw(0):(L>1?nw(1):''))+nt_(L>2?'この4枚を並べる方法を数える':'取り出した4文字(並べる前)')}
+};
+const QSC=[
+ slotScene(K[2].slots,K[2].pool,[3,0,1,2],{notes:{0:'0 は置けない',3:'奇数だけ'}}),
+ (e,L,nw)=>{const o=L>1?[...e[1]]:[...'ABC'];return rw(ch('子',BL)+ch('子',BL)+`<span class="sblk">${o.map(c=>ch('大'+c,RD,nw(1))).join('')}</span>`+ch('子',BL)+ch('子',BL))+nt_('赤い枠が大人3人のかたまり。かたまり1個と子ども4人で「5個」を並べる')},
+ gapScene(['子','子','子','子'],['大1','大2','大3']),
+ (e,L,nw)=>{const pick=L?(e[0]==='両方'?'AB':e[0]==='Aだけ'?'A':'B')+(L>1?e[1]:''):'';return rw([...'ABCDEF'].map(c=>ch(c,'AB'.includes(c)?RD:BL,L&&!pick.includes(c)?'off':(pick.includes(c)?nw(L-1):''))).join(''))+nt_(L?'濃い丸が、選ばれた係(3人になるまで選ぶ)':'6人から3人を選ぶ。赤い A, B の少なくとも一方が入る')},
+ (e,L,nw)=>rw(grp('A組',L>0?[1,2,3].map(i=>ch(i,BL,nw(0))).join(''):'')+grp('B組',L>1?[4,5,6].map(i=>ch(i,RD,nw(1))).join(''):'')+grp('C組',L>2?[7,8,9].map(i=>ch(i,GN,nw(2))).join(''):''))+rw([...Array(9)].map((_,i)=>ch(i+1,GY,i<L*3?'off':'')).join(''))+nt_('分け方の1つの例。いまは組に A・B・C と名前を付けている'),
+ (e,L,nw)=>cells([...Array(7)].map((_,i)=>[0,2,5].includes(i)?(L>0?'S':'?'):[1,4].includes(i)?(L>1?'C':'?'):L>2?(i===3?e[2][0]:e[2][2]):'?'),i=>[0,2,5].includes(i)?(L>0?'on '+nw(0):''):[1,4].includes(i)?(L>1?nw(1):''):(L>2?nw(2):''),i=>(i+1)+'番目')+nt_('S, U, C, C, E, S, S の7文字を並べる。置き方の1つの例'),
+ (e,L)=>rw(miniPath(strPts('→→↑→→↑→↑'),5,3,{}))+nt_('→ → <b style="color:'+RD+'">↑</b> → → <b style="color:'+RD+'">↑</b> → <b style="color:'+RD+'">↑</b><br>8個の矢印のうち、↑ が 3, 6, 8番目にある道'),
+ barsScene(8,['1人目','2人目','3人目'],0,'本'),
+ slotScene(['百の位','十の位','一の位'],[1,2,3,4,5],[0,1,2],{head:'320 より大きい3桁の数を作る'}),
+ (e,L,nw)=>{const m={1:L>1?e[1]:CIR[0],2:L>2?e[2]:CIR[1],3:L>0?'B':CIR[2],4:L>3?e[3]:CIR[3],5:L>4?e[4]:CIR[4]},col=t=>CIR.includes(t)?null:(t==='B'?RD:GY),wh={1:1,2:2,3:0,4:3,5:4};
+  return rw(ring([{t:'A',c:RD}].concat([1,2,3,4,5].map(k=>({t:m[k],c:col(m[k]),cls:nw(wh[k])})))))+nt_('A の席を固定した。向かいの ③ が B の席')},
+ barsScene(9,['x','y','z'],1,''),
+ (e,L,nw)=>{const[i,j]=L?e[0].split(',').map(Number):[0,0];let r=[...'CDE'];return cells([...Array(5)].map((_,k)=>k+1===i?'A':k+1===j?'B':L>1?r.shift():'?'),k=>k+1===i||k+1===j?'on '+nw(0):(L>1?nw(1):''),k=>(k+1)+'番目')+nt_(L?'選んだ2か所のうち、左に A、右に B が入る':'5か所のうち2か所を A と B の場所にする')},
+ (e,L,nw)=>cells(['大','中','小'].map((_,i)=>i<L?(e[i]==='6'?'6':'1〜5'):'?'),i=>(i<L&&e[i]==='6'?'on ':'')+nw(i),i=>['大','中','小'][i])+nt_('色のついたさいころが 6 の目。「1〜5」は5通りをまとめたもの'),
+ (e,L,nw)=>rw([1,2,3,4,5,6].map(k=>L>0&&e[0].includes(k)?ch('赤',RD,nw(0)):L>1&&e[1].includes(k)?ch('白',GY,nw(1)):L>1?ch('青',BL,nw(1)):`<span class="sbx"><b>?</b><small>${k}</small></span>`).join(''))+nt_('6か所に玉を置く。同じ色の玉は見分けがつかない'),
+ (e,L,nw)=>L?rw([...e[0]].map(c=>ch(c,c==='男'?BL:RD,nw(0))).join(''))+nt_('男女が交互になる型は、この型ともう1つだけ'):rw('男男男'.split('').map(c=>ch(c,BL)).join('')+'女女女'.split('').map(c=>ch(c,RD)).join(''))+nt_('男子3人と女子3人を、交互に並べる'),
+ (e,L)=>rw(poly8(L>1?[[e[0],e[1]]]:[],L?[e[0]].concat(L>1?[e[1]]:[]):[]))+nt_(L>1?'赤い線が対角線。となりの頂点とは結ばない':L?'赤い頂点から、対角線を引く相手を選ぶ':'正八角形。頂点2個を結ぶ線のうち、辺でないものが対角線'),
+ slotScene(['百の位','十の位','一の位'],[0,1,2,3,4],[2,0,1],{notes:{0:'0 は置けない',2:'0 だけ'},head:'5の倍数になる3桁の数を作る'}),
+ barsScene(7,['りんご','なし','もも'],0,'個'),
+ (e,L,nw)=>{const x=L>1?[...e[1]]:[],y=L>2?[...'abcd'].filter(c=>!x.includes(c)):[];return rw(grp('4人の組',L>0?[1,2,3,4].map(i=>ch(i,BL,nw(0))).join(''):'')+grp('X組',x.map(c=>ch(c,RD,nw(1))).join(''))+grp('Y組',y.map(c=>ch(c,GN,nw(2))).join('')))+nt_('分け方の1つの例。いまは2人の組に X・Y と名前を付けている')},
+ gapScene(['c','d','e','f'],['a','b'],GY)
+];
+const SPC={};const spOf=(k,f)=>{if(!SPC[k]){const sp=f(),sc=k[0]==='d'?SCN[k]:QSC[+k.slice(1)];if(sc)sp.sc=sc;SPC[k]=sp}return SPC[k]};
+
+/* ---------- 7つの考え方 ---------- */
+const T=['条件のきつい所から決める','場合分けして足す','かたまりにする','すきまに入れる','全体から引く','区別をなくして割る','別の並べ方に置き換える'];
+const TD=[
+ {cue:'置けるものが限られた場所がある',d:'「運転席は免許のある人だけ」「千の位に 0 は置けない」のように、置けるものが限られた場所がある問題。その場所を先に決めると、樹形図の線の本数がそろう。'},
+ {cue:'どう決めても線の本数がそろわない',d:'どの順番で決めても、樹形図の線の本数がそろわない問題。図が色で分かれるので、色ごとに数えて足す。'},
+ {cue:'「隣り合う」「続いて並ぶ」',d:'「隣り合う」「続いて並ぶ」と書いてある問題。くっつくものを1個にまとめて並べ、そのあとで中を並べる。'},
+ {cue:'「隣り合わない」',d:'「隣り合わない」と書いてある問題。隣り合ってよい側を先に並べ、その間と両端のすきまに残りを入れる。'},
+ {cue:'「少なくとも」「〜でない」',d:'「少なくとも」「〜を含まない」「共有しない」と書いてある問題。そのまま数えにくいので、反対側を数えて全体から引く。'},
+ {cue:'同じ文字・円・名前のない組',d:'同じ文字がある、円く並ぶ、組に名前がない問題。いったん区別して数え、重なった個数で割る(「重なり」タブの仕組み)。'},
+ {cue:'道や分け方を、矢印や ○ と仕切りに',d:'最短経路や「何個ずつに分けるか」の問題。矢印の並べ方や、○ と仕切りの並べ方に書きかえて数える。'}
+];
+const DTP={'39':[0],'41a':[1,0],'41b':[1],'42a':[1,0],'42b':[1,0],'43':[3],'45':[2],'51':[1],'55':[5,2],'59':[1],'61':[5],'64':[6],'68':[5],'70':[4],'71':[4,1],'72':[5],'73':[6],'74':[5,0],'76':[1],'118':[6]};
+
+/* ---------- ステップ演習 ---------- */
+// o[0] が正解。表示時にシャッフルする。
+const D=[
+{id:'39',ref:'39(2)',tag:'きつい条件から',t:'5人乗りの車に5人が乗る。免許を持っているのは3人だけ。乗り方は何通りか。',s:[
+ {q:'最初に決める席は?',o:['運転席','助手席','どこからでも同じ'],w:'条件がついているのは運転席だけ。後回しにすると、免許のある人が何人残っているかが場合によって変わってしまう。'},
+ {q:'運転席に座れる人は何通り?',o:['3','5','1'],w:'免許のある3人が「いま選べる人」。だから 3 と書ける。'},
+ {q:'残りの4席の座り方は?',o:['4! = 24','5! = 120','4'],w:'運転手を除いた4人を4席に並べる。だれが運転しても残りは必ず4人なので掛け算できる。'}],f:'3 × 4! = 72 通り'},
+{id:'41a',ref:'41(1)',tag:'場合分け',t:'0, 1, 2, 3, 4 から異なる3個を使って3桁の整数を作る。偶数は何個か。',s:[
+ {q:'条件がついている位は?',o:['一の位(偶数)と百の位(0以外)','十の位','一の位だけ'],w:'条件が2か所にある。そして 0 は両方に関係する。'},
+ {q:'なぜ「一の位が0」と「一の位が2か4」に分けるのか?',o:['0を一の位に使うかどうかで、百の位に置ける数字の個数が変わるから','0は偶数ではないから','分けなくても同じ答えになる'],w:'一の位が0なら百の位は残り4個。一の位が2か4なら、百の位は0も除いて3個。「いま選べる個数」が変わるときに場合分けが必要になる。'},
+ {q:'一の位が0のとき',o:['4 × 3 = 12','5 × 4 = 20','3 × 3 = 9'],w:'百の位は残り4個、十の位はさらに残り3個。'},
+ {q:'一の位が2か4のとき',o:['2 × 3 × 3 = 18','2 × 4 × 3 = 24','2 × 3 × 2 = 12'],w:'一の位2通り。百の位は「0と一の位」以外の3個。十の位は残り3個(ここで0が使える)。'}],f:'12 + 18 = 30 個'},
+{id:'41b',ref:'41(2)',tag:'場合分け',t:'0, 1, 2, 3, 4 から異なる3個を使って3桁の整数を作る。3の倍数は何個か。',s:[
+ {q:'先に決めるものは?',o:['各位の和が3の倍数になる「3個の組」','百の位の数字','一の位の数字'],w:'3の倍数かどうかは並び順に関係なく、使う3個の和で決まる。まず組を選び、あとで並べる。'},
+ {q:'組は {0,1,2} {0,2,4} {1,2,3} {2,3,4} の4つ。0を含む組1つから作れる整数は?',o:['3! − 2! = 4 個','3! = 6 個','2 個'],w:'3個の並べ方 3! のうち、百の位が0になる 2! 通りを除く。'},
+ {q:'合計は?',o:['4 × 2 + 6 × 2 = 20','6 × 4 = 24','4 × 4 = 16'],w:'0を含む組が2つ(4個ずつ)、含まない組が2つ(6個ずつ)。'}],f:'20 個'},
+{id:'42a',ref:'42(1)',tag:'場合分け',t:'1〜6 から異なる4個を使って4桁の整数を作る。4300 より大きいものは何個か。',s:[
+ {q:'どこで分ける?',o:['千の位が5,6の場合と、千の位が4の場合','一の位が偶数か奇数か','分けない'],w:'千の位が5,6なら残りは何でもよい。千の位が4のときだけ百の位に条件がつく。'},
+ {q:'千の位が5か6のとき',o:['2 × ₅P₃ = 120','2 × ₆P₃ = 240','₅P₃ = 60'],w:'千の位に1個使ったので、残りは5個。そこから3個を並べる。'},
+ {q:'千の位が4のとき、百の位に置けるのは?',o:['3, 5, 6 の3通り','3 だけ','5, 6 の2通り'],w:'43□□ はいちばん小さくても 4312 で、4300 より大きい。だから3も入る。境目の数は実際に最小を作って確かめる。'},
+ {q:'千の位が4のとき',o:['3 × ₄P₂ = 36','3 × ₅P₂ = 60','2 × ₄P₂ = 24'],w:'千・百で2個使い、残り4個から2個を並べる。'}],f:'120 + 36 = 156 個'},
+{id:'42b',ref:'42(2)',tag:'場合分け',t:'1〜6 から異なる4個を使って4桁の整数を作る。5000 より大きい偶数は何個か。',s:[
+ {q:'なぜ千の位が5のときと6のときで分けるのか?',o:['千の位に6を使うと、一の位に置ける偶数が2個に減るから','5は奇数で使えないから','分ける必要はない'],w:'偶数 2, 4, 6 のうち、6を千の位で使うと一の位は 2, 4 だけ。選べる個数が変わるので分ける。'},
+ {q:'千の位が5のとき',o:['3 × ₄P₂ = 36','3 × ₅P₂ = 60','2 × ₄P₂ = 24'],w:'一の位は 2, 4, 6 の3通り。真ん中2桁は残り4個から2個。'},
+ {q:'千の位が6のとき',o:['2 × ₄P₂ = 24','3 × ₄P₂ = 36','2 × ₅P₂ = 40'],w:'一の位は 2, 4 の2通り。真ん中2桁は残り4個から2個。'}],f:'36 + 24 = 60 個'},
+{id:'43',ref:'43(4)',tag:'すきま',t:'女子5人、男子3人が1列に並ぶ。どの男子も隣り合わない並び方は何通りか。',s:[
+ {q:'先に並べるのは?',o:['女子5人','男子3人','8人全員'],w:'隣り合ってもよい側を先に並べると、その間と両端に「すきま」ができる。男子を別々のすきまに入れれば隣り合わない。'},
+ {q:'女子5人を並べたとき、すきまは両端を含めていくつ?',o:['6','5','4'],w:'∨女∨女∨女∨女∨女∨ で6か所。'},
+ {q:'男子3人の入れ方は?',o:['₆P₃ = 120','₆C₃ = 20','3! = 6'],w:'男子は別人なので、どのすきまにだれが入るかを区別する。6か所から3か所を選んで並べる順列。'}],f:'5! × ₆P₃ = 120 × 120 = 14400 通り'},
+{id:'45',ref:'45(2)',tag:'かたまり',t:'equations の9文字(すべて異なる)を並べる。e と a の間に文字がちょうど2つあるものは何通りか。',s:[
+ {q:'「e ○ ○ a」を1つのかたまりにする。間の2文字の入れ方は?',o:['₇P₂ = 42','₇C₂ = 21','₉P₂ = 72'],w:'e, a 以外の7文字から2文字。左右の順も区別するので順列。'},
+ {q:'e と a の左右は?',o:['2 通り','1 通り','4 通り'],w:'e○○a と a○○e。'},
+ {q:'かたまり1個と残りの文字を並べると?',o:['6!','5!','9!'],w:'9文字のうち4文字がかたまりになったので、残り5文字 + かたまり1個 = 6個を並べる。'}],f:'42 × 2 × 6! = 60480 通り'},
+{id:'51',ref:'51',tag:'重複順列',t:'○ と × を重複を許して並べる。(1) 6個並べる (2) 1個以上6個以下並べる',s:[
+ {q:'(1) 6個並べる',o:['2⁶ = 64','6² = 36','₆P₂ = 30'],w:'どの場所でも「いま選べる」のは ○ か × の2通り。使っても減らないので 2 が6回続く。'},
+ {q:'(2) 1個以上6個以下',o:['2 + 4 + 8 + 16 + 32 + 64 = 126','64 × 6 = 384','64 − 1 = 63'],w:'個数ごとに別の並びなので、個数で場合分けして足す。'}],f:'(1) 64 通り (2) 126 通り'},
+{id:'55',ref:'55',tag:'円順列',t:'男子4人、女子4人が手をつないで輪を作る。(1) 女子4人が続く (2) 男女が交互',s:[
+ {q:'(1) 女子4人をかたまりにすると、かたまり1個と男子4人の円順列は?',o:['(5−1)! = 24','5! = 120','4! × 4 = 96'],w:'5個の円順列。回して同じものを1つと数えるので、1個を固定して残り4個を並べる。'},
+ {q:'(1) かたまりの中の女子の並び方は?',o:['4! = 24','(4−1)! = 6','1'],w:'輪の中での場所がもう決まっているので、ここは普通の1列の順列。→ 24 × 24 = 576'},
+ {q:'(2) まず男子4人で輪を作ると?',o:['(4−1)! = 6','4! = 24','4'],w:'男子だけの円順列。'},
+ {q:'(2) 男子の間の4か所に女子を入れると?',o:['4! = 24','(4−1)! = 6','₄C₄ = 1'],w:'男子が座ったあとは、4か所は「だれとだれの間か」で区別できる。もう回しても重ならないので普通の順列。'}],f:'(1) 576 通り (2) 6 × 24 = 144 通り'},
+{id:'59',ref:'59(3)',tag:'場合分け',t:'0, 1, 2, 3 を重複を許して使ってできる自然数のうち、123 より小さいものは何個か。',s:[
+ {q:'どう分ける?',o:['桁数(1桁・2桁・3桁)で分ける','偶数と奇数で分ける','分けない'],w:'1桁と2桁は全部123より小さい。3桁だけ細かく調べる。'},
+ {q:'2桁の自然数は?',o:['3 × 4 = 12','4 × 4 = 16','3 × 3 = 9'],w:'十の位は0以外の3通り、一の位は4通り(重複OK)。1桁は 1, 2, 3 の3個。'},
+ {q:'3桁では 10□ が4個、11□ が4個。12□ は?',o:['3 個(120, 121, 122)','4 個','2 個'],w:'123 自身は含まない。「より小さい」の境目は書き出して確かめる。'}],f:'3 + 12 + (4 + 4 + 3) = 26 個'},
+{id:'61',ref:'61',tag:'区別をなくす',t:'10人を分ける。(1) 2つの部屋 A, B に入れる(全員が同じ部屋でもよい)(2) 2つの組 A, B に分ける (3) 2つの組に分ける',s:[
+ {q:'(1) 部屋 A, B に入れる',o:['2¹⁰ = 1024','10² = 100','₁₀C₂ = 45'],w:'1人ずつ「A か B か」の2通りを選ぶ。それが10人分。'},
+ {q:'(2) 組 A, B に分ける(0人の組は組にならない)',o:['1024 − 2 = 1022','1024 − 1 = 1023','1024 ÷ 2 = 512'],w:'全員 A、全員 B の2通りを除く。'},
+ {q:'(3) 名前のない2つの組に分ける',o:['1022 ÷ 2 = 511','1022','1022 − 2 = 1020'],w:'A, B の名前を入れ替えただけのものが同じ分け方になる。1つの分け方をちょうど2回ずつ数えているので2で割る。'}],f:'(1) 1024 (2) 1022 (3) 511 通り'},
+{id:'64',ref:'64(6)',tag:'Cの性質',t:'ₙ₊₁Cₙ₋₁ を求めよ。',s:[
+ {q:'ₙCᵣ = ₙCₙ₋ᵣ が成り立つ理由は?',o:['「選ぶ r 個を決める」ことと「残す n−r 個を決める」ことは同じだから','分母と分子を約分できるから','公式だから'],w:'10人から8人選ぶのは、選ばない2人を決めるのと同じ。'},
+ {q:'n+1 個から n−1 個選ぶ = 残す個数は?',o:['2 個','n 個','1 個'],w:'(n+1) − (n−1) = 2。'},
+ {q:'答えは?',o:['ₙ₊₁C₂ = n(n+1)/2','ₙ₊₁C₂ = n(n−1)/2','(n+1)n'],w:'n+1 個から2個選ぶ:(n+1) × n ÷ 2。'}],f:'n(n+1)/2'},
+{id:'68',ref:'68(1)',tag:'区別をなくす',t:'a, b, b, b, c, c, d の7文字を1列に並べる方法は何通りか。',s:[
+ {q:'もし7文字すべてに番号をつけて区別したら?',o:['7!','7','₇P₃'],w:'まず全部を区別して数える。'},
+ {q:'b の番号を消すと、同じ並びを何回数えたことになる?',o:['3! = 6 回','3 回','2 回'],w:'b₁b₂b₃ の入れ替え 3! 通りが1つに重なる。'},
+ {q:'c も同じように考えると?',o:['7! ÷ (3! × 2!) = 420','7! ÷ 5! = 42','7! ÷ (3 × 2) = 840'],w:'b で 3! 個、c で 2! 個が重なる。1束は 3! × 2! = 12個。'}],f:'420 通り'},
+{id:'70',ref:'70',tag:'全体から引く',t:'円に内接する八角形の3個の頂点を結んで三角形を作る。(1) 八角形と1辺だけを共有する (2) 辺を共有しない',s:[
+ {q:'(1) 共有する1辺を決めたとき、3つ目の頂点に選べるのは?',o:['4 個','6 個','5 個'],w:'8個の頂点から、辺の両端2個と、その両隣2個(選ぶと2辺共有になる)を除く。→ 8 × 4 = 32 個'},
+ {q:'(2) はどう数える?',o:['(全体) − (1辺共有) − (2辺共有)','(全体) − (1辺共有)','直接数える'],w:'「共有しない」は直接数えにくい。数えやすい反対側を全体から引く。'},
+ {q:'2辺を共有する三角形は?',o:['8 個','16 個','4 個'],w:'隣り合う2辺を使う三角形は、真ん中の頂点を決めれば1つ決まる。'}],f:'(1) 32 個 (2) ₈C₃ − 32 − 8 = 56 − 40 = 16 個'},
+{id:'71',ref:'71(2)(3)',tag:'全体から引く',t:'1〜20 の整数から異なる3個を選ぶ。(2) 奇数も偶数も含む組 (3) 和が奇数になる組',s:[
+ {q:'(2) 奇数も偶数も含む',o:['₂₀C₃ − ₁₀C₃ − ₁₀C₃ = 900','₂₀C₃ − ₁₀C₃ = 1020','10 × 10 × 18 = 1800'],w:'反対は「奇数だけ」または「偶数だけ」。1140 − 120 − 120。3つ目の式は同じ組を重複して数えている。'},
+ {q:'(3) 3個の和が奇数になるのは?',o:['奇・奇・奇 または 奇・偶・偶','奇・奇・偶 または 奇・奇・奇','奇数を1個以上含むとき'],w:'奇数の個数が奇数個(1個か3個)のとき和は奇数。'},
+ {q:'(3) の個数は?',o:['₁₀C₃ + 10 × ₁₀C₂ = 570','₁₀C₃ + ₁₀C₂ × ₁₀C₂ = 2145','₁₀C₃ × 10 = 1200'],w:'奇3個:120。奇1個と偶2個:10 × 45 = 450。'}],f:'(2) 900 通り (3) 570 通り'},
+{id:'72',ref:'72',tag:'区別をなくす',t:'12人の生徒を組に分ける。',s:[
+ {q:'(2) 6人・4人・2人の3組',o:['₁₂C₆ × ₆C₄ = 13860(割らない)','₁₂C₆ × ₆C₄ ÷ 3!','₁₂C₆ × ₁₂C₄ × ₁₂C₂'],w:'人数が違う組は人数で区別がつく。重複して数えていないので割らない。'},
+ {q:'(4) 6人ずつの2組',o:['₁₂C₆ ÷ 2 = 462','₁₂C₆ = 924','₁₂C₆ ÷ 6 = 154'],w:'A, B の部屋なら 924 通り((3) の答え)。部屋の名前を消すと同じ分け方が2回ずつ出てくる。'},
+ {q:'(5) 8人・2人・2人の3組',o:['₁₂C₈ × ₄C₂ ÷ 2! = 1485','₁₂C₈ × ₄C₂ ÷ 3! = 495','₁₂C₈ × ₄C₂ = 2970'],w:'区別がつかないのは人数が同じ「2人の組」2つだけ。だから 2! で割る。8人の組は区別がつく。'},
+ {q:'(6) 3人ずつの4組',o:['₁₂C₃ × ₉C₃ × ₆C₃ ÷ 4! = 15400','₁₂C₃ × ₉C₃ × ₆C₃ ÷ 4','₁₂C₃ × ₉C₃ × ₆C₃ ÷ 3!'],w:'同じ人数の組が4つ。組の名前の入れ替えは 4! 通り。'}],f:'(1) ₁₂C₇ = 792 (2) 13860 (3) 924 (4) 462 (5) 1485 (6) 15400'},
+{id:'73',ref:'73',tag:'置き換える',fig:1,t:'横7区画・縦5区画の街路で、P から Q まで行く最短経路。R は P から右3・上2、S は右4・上4 の交差点。× は「右4・上3」と「右5・上3」の間の道。',s:[
+ {q:'(1) 総数。どの道も → 7個と ↑ 5個を使う。',o:['₁₂C₅ = 792','₁₂P₅ = 95040','7 × 5 = 35'],w:'道1本 = → 7個・↑ 5個の列1つ。12か所のうち ↑ を置く5か所を選ぶ。矢印どうしは区別しないので P ではなく C。'},
+ {q:'(2) R を通る。P→R は →3個・↑2個で ₅C₂ = 10。R→Q は?',o:['→4個・↑3個で ₇C₃ = 35','→4個・↑3個で ₇C₂ = 21','₁₂C₅ − 10 = 782'],w:'R から Q までは右に 7−3 = 4、上に 5−2 = 3。残りの矢印を数えれば決まる。'},
+ {q:'(2) P→R の10通りと R→Q の35通りをどうする?',o:['10 × 35 = 350','10 + 35 = 45','792 − 10 × 35 = 442'],w:'前半の道1本ごとに、後半が35通りずつ続く。前半と後半を自由に組み合わせられるので掛け算。'},
+ {q:'(3) R と S をともに通る。R→S は →1個・↑2個。',o:['10 × ₃C₁ × ₄C₁ = 120','10 + 3 + 4 = 17','350 × ₄C₁ = 1400'],w:'P→R(10)、R→S(₃C₁ = 3)、S→Q は →3個・↑1個(₄C₁ = 4)。3区間に切って掛ける。'},
+ {q:'(4) × を通らない。× を通る道は「× の左端まで」×「× の右端から」。',o:['792 − ₇C₃ × ₄C₂ = 792 − 210 = 582','792 − ₇C₃ = 757','792 − ₇C₃ × ₅C₂ = 442'],w:'× は点ではなく道(区間)。左端(右4・上3)までが ₇C₃ = 35、区間そのものは1通り、右端(右5・上3)から Q までは →2個・↑2個で ₄C₂ = 6。通る道 210 を全体から引く。'}],f:'(1) 792 (2) 350 (3) 120 (4) 582 通り'},
+{id:'74',ref:'74',tag:'区別をなくす',t:'YOKOHAMA の8文字(O が2個、A が2個)を1列に並べる。(1) O と A が必ず偶数番目 (2) Y, K, H, M がこの順',s:[
+ {q:'(1) 偶数番目の4か所に O, O, A, A を並べる',o:['4! ÷ (2! × 2!) = 6','4! = 24','₄C₂ × 2 = 12'],w:'同じ文字を含む順列。4か所のうち O を置く2か所を選ぶ ₄C₂ と見ても6。'},
+ {q:'(1) 奇数番目の4か所に Y, K, H, M を並べる',o:['4! = 24','4! ÷ 2! = 12','1'],w:'4文字とも違うので普通の順列。→ 6 × 24 = 144'},
+ {q:'(2) 「この順にある」をどう扱う?',o:['Y, K, H, M を同じ文字 ○ とみなして並べる','最後に 4! を掛ける','4文字をかたまりにする'],w:'○ を4個置けば、そこへ左から Y, K, H, M と入れる方法は1通りだけ。隣り合う必要はないのでかたまりではない。'},
+ {q:'(2) の個数は?',o:['8! ÷ (4! × 2! × 2!) = 420','8! ÷ 4! = 1680','8! ÷ (2! × 2!) = 10080'],w:'○ が4個、O が2個、A が2個の並べ方。'}],f:'(1) 144 通り (2) 420 通り'},
+{id:'76',ref:'76',tag:'場合分け',t:'DEFENSE の7文字(E が3個)から4文字を取り出して並べる。',s:[
+ {q:'何で場合分けする?',o:['E を何個含むか','最初の文字が何か','子音の個数'],w:'同じ文字の個数で分けると、重なりなく分けられ、それぞれ数えやすい。'},
+ {q:'E を3個含む場合の順列',o:['4 × (4! ÷ 3!) = 16','4 × 4! = 96','4'],w:'残り1文字は D, F, N, S の4通り(組合せは4)。E,E,E,□ の並べ方は 4!/3! = 4。'},
+ {q:'E をちょうど2個含む場合の順列',o:['₄C₂ × (4! ÷ 2!) = 72','₄C₂ × 4! = 144','₄P₂ = 12'],w:'E 以外の2文字の選び方 6通り(組合せは6)。E,E,□,△ の並べ方は 4!/2! = 12。'},
+ {q:'4文字とも異なる場合の順列',o:['₅P₄ = 120','4! = 24','₅C₄ = 5'],w:'文字の種類は D, E, F, N, S の5種類。そこから4種類を選んで並べる(組合せは ₅C₄ = 5)。'}],f:'組合せ 4 + 6 + 5 = 15 通り、順列 16 + 72 + 120 = 208 通り'},
+{id:'118',ref:'118頁 例題16・78〜81',tag:'置き換える',t:'柿・りんご・みかんの3種類から10個買う。',s:[
+ {q:'買い方を何の並べ方に置き換える?',o:['○ 10個と仕切り2本','○ 10個と仕切り3本','○ 3個と仕切り10本'],w:'3種類を分ける境目は2本。仕切りの左が柿、間がりんご、右がみかん。'},
+ {q:'買わない果物があってもよいとき',o:['₁₂C₂ = 66','₁₀C₃ = 120','3¹⁰'],w:'○ と仕切りで合計12か所。そのうち仕切りの2か所を選ぶ。'},
+ {q:'どの果物も1個以上買うとき',o:['先に1個ずつ買い、残り7個を分ける → ₉C₂ = 36','66 − 3 = 63','₁₀C₂ = 45'],w:'条件を先に満たしてしまえば、残りは「0個OK」の問題になる。○ 7個と仕切り2本。'},
+ {q:'x + y + z = 7 を満たす0以上の整数の組',o:['₉C₂ = 36','₇C₃ = 35','₈C₂ = 28'],w:'○ 7個を x, y, z の3つに分ける。○ 7個と仕切り2本。'},
+ {q:'さいころを3回投げて a ≦ b ≦ c となる場合',o:['1〜6から重複を許して3個選ぶ → ₈C₃ = 56','₆C₃ = 20','6³ = 216'],w:'3個選べば、小さい順に並べる方法は1通り。○ 3個と仕切り5本の並べ方。a < b < c なら重複なしで ₆C₃ = 20。'}],f:'例題16:(1) 66 (2) 36 通り'}
+];
+function drillList(){
+ const n=D.filter(d=>S.done[d.id]).length;
+ let h=`<div class="card"><h2>問題集を樹形図で確かめる</h2><div class="sub">問題集の赤チェックの問題を、<b>7つの考え方</b>ごとに並べた。どの問題も、この7つのどれか(または組み合わせ)で解ける。「初見」タブで選ぶのも、この7つ。</div><div class="score">${n} / ${D.length} 完了</div></div>`;
+ T.forEach((t,k)=>{const ds=D.map((d,i)=>[d,i]).filter(x=>DTP[x[0].id][0]===k);if(!ds.length)return;
+  h+=`<div class="card" style="margin-bottom:4px"><h2><span class="sw" style="background:${TC[k]}"></span>${k+1}. ${t}</h2><div class="sub">${TD[k].d}</div></div>`+
+  ds.map(([d,i])=>`<button class="item" style="margin:4px 0 4px 14px;width:calc(100% - 14px)" data-drill="${i}">${S.done[d.id]?'<span class="done">✓</span>':''}<b>${d.ref}</b>${DTP[d.id][1]!==undefined?` <span class="tag">＋ ${T[DTP[d.id][1]]}</span>`:''}<br><span class="sub">${esc(d.t)}</span></button>`).join('')});
+ return h;
+}
+function openDrill(i){S.drill={i,step:0,ord:D[i].s.map(s=>shuffle([0,1,2])),ng:{}}}
+function drillView(){
+ const st=S.drill,d=D[st.i],fa=FX.ans||{},ns=d.s.length,sp=TS[d.id]?spOf('d'+d.id,TS[d.id]):null,lk=DL[d.id];
+ const fig=()=>{if(!sp)return'';const N=sp.cols.length,L=Math.ceil(N*Math.min(st.step,ns)/ns),pv=Math.ceil(N*Math.max(0,st.step-1)/ns),tc=treeCard(sp,L,!!fa.ok&&L>pv);
+  return `<div class="frac ${fa.ok?'':''}" style="margin:14px 0"><div class="sub"><b>樹形図</b>${sp.cap?' '+sp.cap:''}</div>${tc.html}${L?'':'<div class="sub">ステップに答えると、樹形図が1列ずつ伸び、絵も1つずつ埋まっていく。</div>'}</div>`};
+ const tp=DTP[d.id],tg=tp.map(k=>`<span class="tag" style="font-size:11px;background:${TC[k]};color:#fff;border-radius:6px;padding:2px 8px;margin-right:4px">${T[k]}</span>`).join('');
+ let h=back('drill')+`<div class="card"><b>${d.ref}</b><div style="margin-top:6px">${esc(d.t)}</div>${d.fig?fig73():''}<div style="margin-top:8px"><span class="sub">使う考え方 </span>${tg}</div></div><div class="card">`;
+ d.s.forEach((s,k)=>{
+  if(k>st.step)return;
+  const solved=k<st.step,nw=fa.ok&&k===st.step?'fxin':'',nd=nw?'animation-delay:.35s':'';
+  if(!solved)h+=fig();
+  h+=`<div class="stepn ${nw}" style="${nd}">STEP ${k+1}</div><div class="${nw}" style="${nd}"><b>${esc(s.q)}</b></div>`;
+  st.ord[k].forEach(j=>{
+   const cls=solved&&j===0?'ok':(st.ng[k+'_'+j]?'ng':''),fx=fa.k===k?(fa.ok&&j===0?'fxpulse':(!fa.ok&&j===fa.j?'fxshake':'')):nw;
+   h+=`<button class="opt ${cls} ${fx}" style="${fx===nw?nd:''}" data-ans="${k}_${j}" ${solved?'disabled':''}>${esc(s.o[j])}</button>`;
+  });
+  if(solved)h+=`<div class="why ${fa.ok&&fa.k===k?'fxin':''}" style="animation-delay:.15s">${esc(s.w)}</div>`;
+  else if(Object.keys(st.ng).some(x=>x.startsWith(k+'_')))h+=`<div class="sub">もう一度。上の樹形図で、線の本数を数えてみよう。</div>`;
+ });
+ if(st.step>=ns){
+  h+=fig()+`<div class="say ${fa.ok?'fxpulse':''}"><b>答え:${esc(d.f)}</b></div><div class="why ${fa.ok?'fxin':''}" style="animation-delay:.3s"><b>この問題で使った考え方</b>${tp.map(k=>`<div style="margin-top:6px"><span class="sw" style="background:${TC[k]}"></span><b>${T[k]}</b><br><span class="sub">${TD[k].d}</span></div>`).join('')}</div><div class="row">${lk?`<button class="btn" data-golab="${lk[0]}:${lk[1]}">${lk[2]}</button>`:''}${st.i+1<D.length?`<button class="btn pri" data-drill="${st.i+1}">次の問題へ</button>`:''}<button class="btn" data-back="drill">一覧へ</button></div>`;
+ }
+ return h+'</div>';
+}
+
+/* ---------- 初見の一手 ---------- */
+const Q=[
+{t:'0〜5 の6個の数字から異なる4個を使って、4桁の奇数を作る。',a:0,e:'一の位(1, 3, 5 の3通り)→ 千の位(0と一の位以外の4通り)→ 残り ₄P₂ = 12。3 × 4 × 12 = 144 個。'},
+{t:'大人3人と子ども4人が1列に並ぶ。大人3人が隣り合う。',a:2,e:'大人3人を1つにまとめて 5! 通り。中の並び 3!。120 × 6 = 720 通り。'},
+{t:'大人3人と子ども4人が1列に並ぶ。大人どうしが隣り合わない。',a:3,e:'子ども4人を先に並べ 4!。すきま5か所から3か所に大人 ₅P₃ = 60。24 × 60 = 1440 通り。'},
+{t:'6人から3人の係を選ぶ。A, B の少なくとも一方が選ばれる。',a:4,e:'全体 ₆C₃ = 20。A も B も選ばれないのは残り4人から3人で 4。20 − 4 = 16 通り。'},
+{t:'9人を3人ずつの3組に分ける。',a:5,e:'₉C₃ × ₆C₃ = 1680 は組に名前がある場合。同じ人数の3組なので 3! で割って 280 通り。'},
+{t:'SUCCESS の7文字を1列に並べる。',a:5,e:'S が3個、C が2個。7! ÷ (3! × 2!) = 420 通り。'},
+{t:'碁盤の目の道を、右に5区画・上に3区画進む最短経路。',a:6,e:'→ 5個と ↑ 3個の並べ方。8か所から ↑ の3か所を選び ₈C₃ = 56 通り。'},
+{t:'同じ鉛筆6本を3人に配る(もらえない人がいてもよい)。',a:6,e:'○ 6個と仕切り2本の並べ方。₈C₂ = 28 通り。'},
+{t:'1〜5 から異なる3個を使って3桁の整数を作る。320 より大きいもの。',a:1,e:'百の位4, 5:2 × ₄P₂ = 24。百の位3:十の位4, 5 で 2 × 3 = 6、十の位2で 321, 324, 325 の3。合計 33 個。'},
+{t:'6人が円卓に座る。A と B が向かい合う。',a:0,e:'A を固定すると B の席は向かいの1通りに決まる。残り4人は 4! = 24 通り。'},
+{t:'x + y + z = 10 を満たす正の整数の組 (x, y, z)。',a:6,e:'先に1ずつ配り、残り7を分ける。○ 7個と仕切り2本で ₉C₂ = 36 個。'},
+{t:'A, B, C, D, E の5人が1列に並ぶ。A は B より左にいる。',a:5,e:'A, B を同じ ○ とみなす。5! ÷ 2! = 60 通り。「A が左」と「B が左」は同じ数ずつある、と見てもよい。'},
+{t:'大・中・小3個のさいころを投げる。少なくとも1個は6の目が出る。',a:4,e:'全体 6³ = 216。6が1個も出ないのは 5³ = 125。216 − 125 = 91 通り。'},
+{t:'赤玉3個、白玉2個、青玉1個を1列に並べる。',a:5,e:'6! ÷ (3! × 2!) = 60 通り。'},
+{t:'男子3人と女子3人が、男女交互に1列に並ぶ。',a:1,e:'「男女男女男女」と「女男女男女男」の2つの型に分ける。それぞれ 3! × 3! = 36。合計 72 通り。'},
+{t:'正八角形の対角線の本数。',a:4,e:'頂点2個の選び方 ₈C₂ = 28 から、辺になる8本を引いて 20 本。'},
+{t:'5個の数字 0, 1, 2, 3, 4 から異なる3個を使う3桁の整数のうち、5の倍数。',a:0,e:'5の倍数になるには一の位が0(5は無い)。一の位を0に決めると百の位4通り、十の位3通りで 12 個。'},
+{t:'りんご・なし・もも から合わせて5個買う(買わない種類があってもよい)。',a:6,e:'○ 5個と仕切り2本。₇C₂ = 21 通り。'},
+{t:'8人を、4人・2人・2人の3組に分ける。',a:5,e:'₈C₄ × ₄C₂ = 420。2人の組が2つで区別がつかないので 2! で割って 210 通り。'},
+{t:'a, b, c, d, e, f の6文字を並べる。a と b が隣り合わない。',a:4,e:'全体 6! = 720 から、隣り合う 5! × 2 = 240 を引いて 480 通り。すきまで数えても 4! × ₅P₂ = 480。'}
+];
+function newQuiz(){const last=S.quiz?S.quiz.i:-1;let i;do{i=Math.floor(Math.random()*Q.length)}while(i===last);S.quiz={i,pick:null,L:0,ng:{},dv:false,opts:null}}
+function qNext(){const z=S.quiz,sp=spOf('q'+z.i,QS[z.i]),N=sp.cols.length;if(z.L>=N)return null;const r=tBuild(sp,z.L+1),cs=tLevel(r,z.L+1);if(cs.length!==1)return{uni:false};
+ let n=r;while(n.d<z.L)n=n.ch[0];const ft=n.ch[0].m>1,v=cs[0],set=new Set([v]);(ft?[v*2,Math.round(v/2)||v+3,v+10]:[v+1,v>2?v-1:v+2,v+3]).forEach(x=>{if(set.size<3&&x>0)set.add(x)});
+ if(!z.opts||z.opts.L!==z.L)z.opts={L:z.L,o:shuffle([...set])};return{uni:true,ft,v,l:n.ch[0].v,o:z.opts.o}}
+function quizView(){
+ if(!S.quiz)newQuiz();
+ const z=S.quiz,q=Q[z.i],p=z.pick,sp=spOf('q'+z.i,QS[z.i]),N=sp.cols.length;
+ let h=`<div class="card"><h2>初見の一手</h2><div class="sub">まず「最初にどの考え方を使うか」を、7つの中から決める。そのあと、樹形図を1列ずつ描きながら答えまで進む。<br>7つの考え方は「確認」タブの問題で1つずつ使ったもの。</div><div class="row" style="margin-top:6px"><button class="btn sm" data-tab="drill">「確認」で7つの考え方を見る</button></div><div class="score">一手目の正解 ${S.qs.ok} / ${S.qs.n} 問</div></div>
+ <div class="card"><div style="font-size:17px"><b>${esc(q.t)}</b></div><div style="margin-top:10px">`;
+ T.forEach((t,j)=>{if(p!==null&&j!==q.a&&j!==p)return;const cls=p===null?'':(j===q.a?'ok':(j===p?'ng':'')),fx=FX.qa&&p!==null?(j===q.a?'fxpulse':(j===p?'fxshake':'')):'';h+=`<button class="opt ${cls} ${fx}" data-qa="${j}" ${p===null?'':'disabled'}><span class="sw" style="background:${TC[j]}"></span><b>${t}</b><br><span class="sub" style="margin-left:20px">${TD[j].cue}</span></button>`});
+ h+='</div>';
+ if(p===null)return h+'</div>';
+ h+=`<div class="why ${FX.qa?'fxin':''}" style="animation-delay:.2s"><b>${p===q.a?'正解。':'一手目は「'+T[q.a]+'」。'}</b><br><span class="sub">${TD[q.a].d}</span><br>では、樹形図で最後まで数える。</div></div>`;
+ const tc=treeCard(sp,z.L,!!FX.qc),nx=qNext(),fin=tc.done&&(!sp.div||z.dv),ans=tc.done?tc.tot/(sp.div?sp.div.by:1):0;
+ h+=`<div class="card ${FX.qa?'fxin':''}" style="${FX.qa?'animation-delay:.4s':''}"><h3 style="margin-top:0">樹形図${sp.cap?`<span class="sub" style="font-weight:400"> ${sp.cap}</span>`:''}</h3>${tc.html}${z.L?'':'<div class="sub">下の問いに答えると、樹形図が1列ずつ伸び、絵も1つずつ埋まっていく。</div>'}`;
+ if(nx){const nm=sp.cols[z.L],dl=FX.qc?`animation-delay:${(tc.T+.3).toFixed(2)}s`:'',fc=FX.qc?'kfade':'';
+  if(nx.uni){h+=`<div class="stepn ${fc}" style="${dl}">${z.L+1}列目</div><div class="${fc}" style="${dl}"><b>${nx.ft?`「${nm}」は、1本の太い線にまとめて描く。${nx.l} はいくつか。`:z.L?`「${nm}」の列。○ 1つから、線は何本出るか。`:`最初の列は「${nm}」。スタートから線は何本出るか。`}</b></div>`+
+   nx.o.map(v=>`<button class="opt ${z.ng[z.L+'_'+v]?'ng':''} ${FX.qng===v?'fxshake':fc}" style="${FX.qng===v?'':dl}" data-qc="${v}">${v}${nx.ft?' 通り':' 本'}</button>`).join('')}
+  else h+=`<div class="stepn ${fc}" style="${dl}">${z.L+1}列目</div><div class="${fc}" style="${dl}"><b>「${nm}」の列は、○ によって出る線の本数がちがう。</b></div><button class="opt ${fc}" style="${dl}" data-qc="go">描いて確かめる</button>`}
+ else if(sp.div&&!z.dv){const dv=sp.div,o=[dv.by,dv.by*2,dv.by+1];
+  h+=`<div class="stepn">重なり</div><div><b>${dv.why}</b></div><div class="flat" style="margin:8px 0">${dv.toks.map((t,i)=>`<span class="tok v fxin" style="animation-delay:${i*.15}s">${t}</span>`).join('')}</div><div><b>${tc.tot} を、いくつで割ればよいか。</b></div>`+
+   o.map(v=>`<button class="opt ${z.ng['d_'+v]?'ng':''} ${FX.qng===v?'fxshake':''}" data-qd="${v}">${v} で割る</button>`).join('')}
+ h+='</div>';
+ if(fin)h+=`<div class="card ${FX.qc||FX.qd?'fxin':''}" style="${FX.qc?`animation-delay:${(tc.T+1.2).toFixed(2)}s`:''}"><div class="say ${FX.qd?'fxpulse':''}" style="margin-top:0"><b>答え:${sp.div?`${tc.tot} ÷ ${sp.div.by} = `:''}${ans} 通り</b>${sp.note?'<br>'+sp.note:''}</div>
+ <div class="why">${esc(q.e)}</div><div class="row"><button class="btn pri" data-qn="1">次の問題</button></div></div>`;
+ return h;
+}
+
+/* ---------- 描画とイベント ---------- */
+function render(){
+ let h;
+ if(S.tab==='cnt')h=G.i===null?kMenu():kView();
+ else if(S.tab==='lab')h=S.lab==='perm'?labPerm():S.lab==='bund'?labBund():S.lab==='path'?labPath():S.lab==='bars'?labBars():labMenu();
+ else if(S.tab==='drill')h=S.drill?drillView():drillList();
+ else h=quizView();
+ app.innerHTML=h;
+ if(FX.nav&&app.children)[...app.children].forEach((c,i)=>{c.classList.add('fxin');c.style.animationDelay=(i*45)+'ms'});
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===S.tab));
+ if(G.cnt){G.cnt=false;const el=$('#kc'),N=G.all.length,t0=performance.now()+G.T*1000,D=1400;if(el){el.textContent='0';(function tick(now){if(!el.isConnected)return;const r=Math.min(1,Math.max(0,(now-t0)/D));el.textContent=Math.round(r*N);if(r<1)requestAnimationFrame(tick)})(performance.now())}}
+ const sel=$('#bsel');if(sel)sel.onchange=()=>{L.bund.i=+sel.value;L.bund.g=false;L.bund.orb=null;L.bund.dup=false;L.bund.auto=false;render()};
+ FX={};
+}
+document.addEventListener('click',ev=>{
+ const b=ev.target.closest('button');if(!b)return;const d=b.dataset;let top=false;if(!d.kbest)G.play=null;if(!d.bauto)L.bund.auto=false;
+ if(d.tab){S.tab=d.tab;if(d.tab==='drill')S.drill=null;if(d.tab==='cnt')G.i=null;top=true}
+ else if(d.lab){S.lab=d.lab;if(d.lab==='path')L.path.intro=true;top=true}
+ else if(d.back){if(d.back==='lab')S.lab=null;else if(d.back==='cnt')G.i=null;else S.drill=null;top=true}
+ else if(d.kopen!==undefined){kOpen(+d.kopen);top=true}
+ else if(d.ko!==undefined){G.ord.push(+d.ko);G.anim=true}
+ else if(d.kbest){G.ord=[];G.play=kBest(G.i).ord.slice();render();window.scrollTo(0,0);setTimeout(kPlay,500);return}
+ else if(d.kundo){G.ord.pop()}
+ else if(d.bop!==undefined){const s=L.bund,x=BP[s.i].ops[+d.bop].f(s.cur);s.dup=s.orb.includes(x);s.cur=x;if(!s.dup)s.orb.push(x);FX.bop=+d.bop}
+ else if(d.bauto){L.bund.auto=true;bAuto();return}
+ else if(d.pick!==undefined){L.perm.ch.push(+d.pick)}
+ else if(d.pn){const s=L.perm;s.n=Math.max(3,Math.min(6,s.n+ +d.pn));s.r=Math.min(s.r,s.n);s.ch=[]}
+ else if(d.pr){const s=L.perm;s.r=Math.max(1,Math.min(s.n,s.r+ +d.pr));s.ch=[]}
+ else if(d.preset){L.perm.ch=[]}
+ else if(d.bg){L.bund.g=!L.bund.g;FX.bg=1}
+ else if(d.mv){const s=L.path;if(d.mv==='u')s.m.pop();else if(d.mv==='r'){s.m=shuffle(Array(s.w).fill('→').concat(Array(s.h).fill('↑')))}else s.m.push(d.mv);FX.mv=d.mv==='r'?'all':d.mv==='u'?null:'last'}
+ else if(d.pintro){L.path.intro=d.pintro==='1';top=true}
+ else if(d.g73){const s=L.path;s.w=7;s.h=5;s.m=[];s.q73=true}
+ else if(d.gw){const s=L.path;s.w=Math.max(2,Math.min(7,s.w+ +d.gw));s.m=[];s.q73=false}
+ else if(d.gh){const s=L.path;s.h=Math.max(1,Math.min(5,s.h+ +d.gh));s.m=[];s.q73=false}
+ else if(d.cell!==undefined){const s=L.bars,i=+d.cell,k=s.b.indexOf(i);if(k>=0)s.b.splice(k,1);else{if(s.b.length>=2)s.b.shift();s.b.push(i);FX.cell=i}}
+ else if(d.br!==undefined){const s=L.bars,n=(s.min1?7:10)+2;s.b=d.br==='1'?shuffle([...Array(n).keys()]).slice(0,2):[];FX.cellAll=1}
+ else if(d.bm){L.bars.min1=!L.bars.min1;L.bars.b=[]}
+ else if(d.drill!==undefined){openDrill(+d.drill);top=true}
+ else if(d.ans){const[k,j]=d.ans.split('_').map(Number),st=S.drill;if(k!==st.step)return;
+  FX.ans={k,j,ok:j===0};if(j===0){st.step++;if(st.step>=D[st.i].s.length){S.done[D[st.i].id]=1;store.set('done',S.done)}}else st.ng[k+'_'+j]=1}
+ else if(d.qc!==undefined){const z=S.quiz,nx=qNext();if(!nx)return;if(d.qc==='go'||+d.qc===nx.v){z.L++;z.ng={};FX.qc=1}else{z.ng[z.L+'_'+d.qc]=1;FX.qng=+d.qc}}
+ else if(d.qd!==undefined){const z=S.quiz,sp=spOf('q'+z.i,QS[z.i]);if(+d.qd===sp.div.by){z.dv=true;FX.qd=1}else{z.ng['d_'+d.qd]=1;FX.qng=+d.qd}}
+ else if(d.golab){const[lb,i]=d.golab.split(':');S.tab='lab';S.lab=lb;if(lb==='bund'){L.bund.i=+i;L.bund.orb=null;L.bund.g=false}if(lb==='path'){const s=L.path;s.intro=false;s.w=7;s.h=5;s.m=[];s.q73=true}top=true}
+ else if(d.qa!==undefined){if(S.quiz.pick!==null)return;S.quiz.pick=+d.qa;FX.qa=1;S.qs.n++;if(+d.qa===Q[S.quiz.i].a)S.qs.ok++;store.set('qs',S.qs)}
+ else if(d.qn){newQuiz();top=true}
+ else return;
+ if(top)FX.nav=1;render();if(top)window.scrollTo(0,0);
+});
+render();
+</script>
+</body>
+</html>
